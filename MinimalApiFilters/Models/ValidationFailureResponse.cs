@@ -10,7 +10,7 @@ namespace MinimalApiFilters.Models
 
     public static class ValidationFailureMapper
     {
-        public static ValidationFailureResponse(this IEnumerable<ValidationFailure> failure)
+        public static ValidationFailureResponse Validate(this IEnumerable<ValidationFailure> failure)
         {
             return new ValidationFailureResponse
             {

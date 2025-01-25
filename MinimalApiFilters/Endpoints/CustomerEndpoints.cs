@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using MinimalApiFilters.Filters;
 using MinimalApiFilters.Models;
 using MinimalApiFilters.Services;
 using System.Runtime.CompilerServices;
@@ -9,10 +10,15 @@ namespace MinimalApiFilters.Endpoints
     {
         public static void MapCustomerEndpoints(this WebApplication app)
         {
-            app.MapGet("customers", GetAllCustomers);
-            app.MapGet("customers/{id:guid}", GetCustomerById);
-            app.MapPost("customers", CreateCustomer);
-            app.MapDelete("customers/{id:guid}", DeleteCustomer);
+            var group = app.MapGroup("/customers")
+                           .WithTags("Customers")
+                           .WithOpenApi();
+
+            group.MapGet("customers", GetAllCustomers);
+            group.MapGet("customers/{id:guid}", GetCustomerById);
+            group.MapPost("customers", CreateCustomer)
+                .AddEndpointFilter<ValidationFilter<Customer>>();
+            group.MapDelete("customers/{id:guid}", DeleteCustomer);
         }
 
         public static async Task<IResult> DeleteCustomer(Guid Id,
@@ -21,14 +27,20 @@ namespace MinimalApiFilters.Endpoints
             var deleted = await customerService.DeleteAsync(Id);
             if(!deleted)
             {
-
+                return Results.NotFound($"customer with ID {Id} not found.");
             }
+            return Results.NoContent();
         }
 
-        public static async Task GetCustomerById(Guid Id, 
+        public static async Task<IResult> GetCustomerById(Guid Id, 
                                     ICustomerService customerService) 
         {
-            var customer = await customerService.GetAsync(id);
+            var customer = await customerService.GetAsync(Id);
+            if (customer is null)
+            {
+                return Results.NotFound($"customer with ID {Id} not found.");
+            }
+            return Results.Ok(customer);
         }
 
         public static async Task<IResult> GetAllCustomers(ICustomerService customerService)
@@ -40,13 +52,9 @@ namespace MinimalApiFilters.Endpoints
         public static async Task<IResult> CreateCustomer(Customer customer,
             IValidator<Customer> validator, ICustomerService customerService)
         {
-            var result = await validator.ValidateAsync(customer);
-            if (!result.IsValid)
-            {
-                return Results.BadRequest(result.Errors.ToResponse());
-            }
-
+      
             await customerService.CreateAsync(customer);
+
             return Results.Created($"/customers/{customer.Id}", customer);
         }
 
