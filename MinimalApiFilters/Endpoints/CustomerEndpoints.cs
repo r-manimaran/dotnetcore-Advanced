@@ -15,9 +15,13 @@ namespace MinimalApiFilters.Endpoints
                            .WithOpenApi();
 
             group.MapGet("customers", GetAllCustomers);
+
             group.MapGet("customers/{id:guid}", GetCustomerById);
+            
+            // Add EndPoint Filter to validate
             group.MapPost("customers", CreateCustomer)
                 .AddEndpointFilter<ValidationFilter<Customer>>();
+            
             group.MapDelete("customers/{id:guid}", DeleteCustomer);
         }
 
