@@ -1,27 +1,28 @@
-﻿using EmployeesApi.Services;
+﻿using EmployeesApi.Pagination;
+using EmployeesApi.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace EmployeesApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/companies/{companyId}/employees")]
     [ApiController]
-    public class EmployeesController(IEmployeeRepository employeeRepository) : ControllerBase
+    public class EmployeesController(IEmployeeService employeeService) : ControllerBase
     {
-        [HttpGet("{id:guid}")]
-        public async Task<IActionResult> GetEmployees(Guid id, CancellationToken cancellationToken)
+        [HttpGet]
+        public async Task<IActionResult> GetEmployees(Guid companyId,
+                            [FromQuery] EmployeeParameters employeeParameters,
+                            CancellationToken cancellationToken)
         {
-            var result = await employeeRepository.GetEmployeesAsync(id,cancellationToken);
-            return Ok(result);
-        }
+            var pageResult = await employeeService
+                            .GetEmployeesAsync(companyId, 
+                                               employeeParameters,
+                                               cancellationToken);
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(pageResult.metadata));
 
-        [HttpGet("companies")]
-        public async Task<IActionResult> GetCompanies(CancellationToken cancellationToken)
-        {
-            var result = await employeeRepository.GetCompanies(cancellationToken);
-            return Ok(result);
+            return Ok(pageResult.employees);
         }
-
 
     }
 }

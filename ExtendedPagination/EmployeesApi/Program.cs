@@ -1,5 +1,7 @@
 using EmployeesApi;
 using EmployeesApi.Data;
+using EmployeesApi.MappingProfile;
+using EmployeesApi.Repository;
 using EmployeesApi.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +17,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<EmployeeSeeder>();
 
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IEmployeeService,EmployeeService>();
+
+builder.Services.AddAutoMapper(typeof(EmployeeProfile));
 
 var app = builder.Build();
 
