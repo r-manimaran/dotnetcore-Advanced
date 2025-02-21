@@ -11,7 +11,7 @@ public class EmployeeSeeder
     private readonly Faker _faker;
     private const int NUMBER_OF_COMPANIES = 20;
     private const int EMPLOYEES_PER_COMPANY = 50;
-
+    List<string> designationsList = ["Architect", "Manager", "Developer", "Program Manager", "Tester", "Business Analysist"];
     public EmployeeSeeder(AppDbContext dbContext, ILogger<EmployeeSeeder> logger)
     {
         _dbContext = dbContext;
@@ -88,6 +88,7 @@ public class EmployeeSeeder
             lastEmployeeId++;
             var employee = employeeFaker.Generate();
             employee.Id = lastEmployeeId;
+            employee.Designation = _faker.PickRandom(designationsList);
             employees.Add(employee);
         }
         return employees;

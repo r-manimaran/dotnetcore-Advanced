@@ -29,8 +29,9 @@ public class EmployeeRepository(AppDbContext dbContext) : IEmployeeRepository
         // Apply Age filter only if MinAge and MaxAge are provided
         if(employeeParameters.MinAge > 0)
         {
+            
             employeesQuery = employeesQuery.Where(e =>
-            e.Age >= employeeParameters.MinAge);            
+                    e.Age >= employeeParameters.MinAge);            
         }
         
         // Apply Age filter only if MaxAge are provided
@@ -40,10 +41,15 @@ public class EmployeeRepository(AppDbContext dbContext) : IEmployeeRepository
             e.Age <= employeeParameters.MaxAge);
         }
 
+        if (!string.IsNullOrEmpty(employeeParameters.SearchTerm))
+        {
+           employeesQuery =  employeesQuery.Search(employeeParameters.SearchTerm);
+        }
         // Include Company details and order by Name
-        employeesQuery = employeesQuery    
+        employeesQuery = employeesQuery
                                 .Include(e => e.Company)
-                                .OrderBy(e => e.Name);
+                                //.OrderBy(e => e.Name);
+                                .Sort(employeeParameters.OrderBy!);
 
         var count = await employeesQuery.CountAsync(cancellationToken);
 
