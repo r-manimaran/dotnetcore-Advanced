@@ -13,3 +13,6 @@
 
 - Sort by multiple fields
 ![alt text](Images/image-5.png)
+
+- Added Seq to capture the log
+![alt text](image.png)

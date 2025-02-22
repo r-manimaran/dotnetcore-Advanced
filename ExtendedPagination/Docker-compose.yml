@@ -1,0 +1,9 @@
+services:
+  seq:
+    image: datalust/seq:latest
+    container_name: seqlogger
+    environment:
+       - ACCEPT_EULA=Y
+    ports:
+      - 5341:5341
+      - 5342:80    
