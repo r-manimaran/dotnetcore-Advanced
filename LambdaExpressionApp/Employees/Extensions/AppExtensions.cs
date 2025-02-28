@@ -4,9 +4,8 @@ using System.Linq.Expressions;
 
 namespace Employees.Extensions;
 
-public static class AppExtensions
+public static partial class AppExtensions
 {
-
     public static async Task ApplyMigrations(this IApplicationBuilder app)
     {
         using (var scope = app.ApplicationServices.CreateScope())
@@ -47,23 +46,5 @@ public static class AppExtensions
 
         // Construct the new lambda expression
         return Expression.Lambda<Func<T, bool>>(combinedBody, parameter);
-    }
-
-    private class ReplaceExpressionVisitor : ExpressionVisitor
-    {
-        private readonly Expression _oldExpr;
-        private readonly Expression _newExpr;
-
-        public ReplaceExpressionVisitor(Expression oldExpr, Expression newExpr)
-        {
-            _oldExpr = oldExpr;
-            _newExpr = newExpr;
-        }
-
-        public override Expression Visit(Expression node)
-        {
-            // Replace occurrences of the old parameter with the new parameter
-            return node == _oldExpr ? _newExpr : base.Visit(node);
-        }
     }
 }
