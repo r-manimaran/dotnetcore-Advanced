@@ -1,15 +1,8 @@
-﻿using Bogus;
-using Employees.Data;
-using Employees.DTOs;
-using Employees.Extensions;
-using Employees.Models;
+﻿using Employees.DTOs;
 using Employees.Services;
-using Microsoft.AspNetCore.Http;
+using EmployeesApi.DTOs;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Employees.Controllers
 {
@@ -26,9 +19,12 @@ namespace Employees.Controllers
 
 
         [HttpPost("")]
-        public async Task<IActionResult> GetFilterEmployees(UserLoginModel user)
+        public async Task<IActionResult> GetFilterEmployees(RequestParameter request)
         {
-            var response = await _employeeService.GetEmployees(user);
+            var response = await _employeeService.GetEmployees(request);
+            var header = JsonSerializer.Serialize(response.Metadata);
+            Response.Headers.Add("X-Pagination", header);
+
             return Ok(response);
         }
     }
