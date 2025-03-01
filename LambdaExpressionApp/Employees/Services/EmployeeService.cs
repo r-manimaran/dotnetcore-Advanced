@@ -3,6 +3,7 @@ using Employees.DTOs;
 using Employees.Extensions;
 using Employees.Models;
 using EmployeesApi.DTOs;
+using EmployeesApi.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -27,7 +28,8 @@ public class EmployeeService(AppDbContext dbContext, ILogger<EmployeeService> lo
             logger.LogInformation("Getting employees for the Role 'User'");
             
             var employeesQuery =  dbContext.Employees
-                                .Where(combined);
+                                           .Where(combined);
+
             count = await employeesQuery.CountAsync();
 
             employees = await employeesQuery
@@ -40,16 +42,39 @@ public class EmployeeService(AppDbContext dbContext, ILogger<EmployeeService> lo
         {
             var adminCombined = gmailUser.AndAlso(isSenior);
             logger.LogInformation("Getting employees for the Role 'Admin'");
-            var employeesQuery = dbContext.Employees.Where(adminCombined);
+            
+            var employeesQuery = dbContext.Employees
+                                          .Where(adminCombined);
 
             count = await employeesQuery.CountAsync();
 
             employees = await employeesQuery
-              .Skip((request.Pagination.PageNumber - 1) * request.Pagination.PageSize)
-              .Take(request.Pagination.PageSize)
-              .ToListAsync();
+                                  .Skip((request.Pagination.PageNumber - 1) * request.Pagination.PageSize)
+                                  .Take(request.Pagination.PageSize)
+                                  .ToListAsync();
         }
 
         return PagedList<Employee>.ToPagedList(employees,count,request.Pagination.PageNumber, request.Pagination.PageSize);
+    }
+
+    public async Task<PagedList<Employee>> GetAorBEmployees(int pageNumber, int pageSize)
+    {
+        Expression<Func<Employee, bool>> nameStartswithA = (x) => x.Name.StartsWith("A");
+        Expression<Func<Employee, bool>> nameStartswithB = (x) => x.Name.StartsWith("B");
+
+        var combined = nameStartswithA.OrElse(nameStartswithB);
+
+        var employeesQuery = dbContext.Employees
+                                      .Where(combined);
+
+        int count = await employeesQuery.CountAsync();
+
+        var employees = await employeesQuery
+                              .Skip((pageNumber- 1) * pageSize)
+                              .Take(pageSize)
+                              .ToListAsync();
+
+        return PagedList<Employee>.ToPagedList(employees, count,
+                                        pageNumber, pageSize);
     }
 }

@@ -27,5 +27,14 @@ namespace Employees.Controllers
 
             return Ok(response);
         }
+
+        [HttpGet("FilterEmployees/{pageNumber}/{pageSize}")]
+        public async Task<IActionResult> GetAorBEmployees(int pageNumber, int pageSize)
+        {
+            var response = await _employeeService.GetAorBEmployees(pageNumber,pageSize);
+            var header = JsonSerializer.Serialize(response.Metadata);
+            Response.Headers.Add("X-Pagination", header);
+            return Ok(response);
+        }
     }
 }
