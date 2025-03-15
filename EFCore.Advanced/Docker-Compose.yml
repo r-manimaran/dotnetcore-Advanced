@@ -1,0 +1,17 @@
+services:
+    demoappdb:
+        container_name: app-db
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        ports:
+            - 8002:1433
+        environment:
+            - ACCEPT_EULA=Y
+            - SA_PASSWORD=StrongP@ss1
+
+    aspire-dashboard:
+        image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
+        environment:
+           DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: true
+        ports:
+          - 18888:18888
+       

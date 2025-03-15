@@ -1,0 +1,6 @@
+@ConnectionPoolApi_HostAddress = http://localhost:5174
+
+GET {{ConnectionPoolApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
