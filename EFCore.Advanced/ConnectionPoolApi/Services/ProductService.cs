@@ -111,11 +111,19 @@ public class ProductService : IProductService
     }
    public async Task<List<Product>> GetProductsComplexQuery(string namePattern, decimal minPrice)
    {
+        // Only needs to
+        // 1. Use Pre-compiled plan
+        // 2. Execute SQL
         return await ToListAsync(getComplexQuery(_dbContext, namePattern, minPrice));
    }
 
    public async Task<List<Product>> GetProductsNormalQuery(string namePattern, decimal minPrice)
    {
+    // Each execution performs these steps
+    // 1. Parse the linq expression tree
+    // 2. Translate LINQ to SQL
+    // 3. Generate execution Plan.
+    // 4. Execute SQL
       return await  _dbContext.Products.AsNoTracking()
                                     .Where(p => p.Price > minPrice)
                                     .Where(p => p.Name.Contains(namePattern))
