@@ -14,4 +14,8 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="posts\" />
+  </ItemGroup>
+
 </Project>
