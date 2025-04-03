@@ -36,7 +36,7 @@ var response2 = await chatClient.GetResponseAsync(chatMessage2);
 Console.WriteLine(response2);
 Console.ReadLine();*/
 
-
+// Example 3:
 foreach(var file in Directory.GetFiles("Images","*.*"))
 {
     var name = Path.GetFileNameWithoutExtension(file);
