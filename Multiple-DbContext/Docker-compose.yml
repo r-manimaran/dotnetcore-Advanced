@@ -1,0 +1,24 @@
+services:
+    sqldb:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        container_name: app_db
+        ports:
+         - 8002:1433
+        environment:
+          - ACCEPT_EULA=Y
+          - SA_PASSWORD=StrongP@ss1
+        networks:
+          - multidbcontext
+
+    aspire-dashboard:
+        image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
+        environment:
+           DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: true
+        ports:
+          - 18888:18888
+        networks:
+          - multidbcontext
+networks:
+  multidbcontext:
+    driver: bridge
+            
