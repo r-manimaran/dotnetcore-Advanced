@@ -55,6 +55,7 @@ app.MapPost("orders", async (SubmitOrderRequest request,
     {
         return Results.BadRequest("Some products are missing");
     }
+
     //using var transaction = new SqlTransaction();
     //orderDbContext.Database.UseTransaction(transaction);
     //productDbContext.Database.UseTransaction(transaction);
