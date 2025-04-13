@@ -1,13 +1,19 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
+using OpenTelemetry;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using System.Transactions;
+using WebApi;
 using WebApi.Dtos;
 using WebApi.Models;
 using WebApi.Models.Orders;
 using WebApi.Models.Products;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddServiceDefaults();
 
 builder.Services.AddOpenApi();
 
@@ -24,6 +30,8 @@ builder.Services.AddDbContext<ProductDbContext>(options =>
 builder.Services.AddDbContext<OrdersDbContext>(options =>
     options.UseSqlServer(connectionString, 
     o=>o.MigrationsHistoryTable(HistoryRepository.DefaultTableName,"orders")));
+
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

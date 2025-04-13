@@ -14,8 +14,12 @@ services:
         image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
         environment:
            DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: true
+            - Otlp__Enabled=true
+            - Otlp__Endpoint=http://+:18888
         ports:
           - 18888:18888
+          - 18889:18889
+        
         networks:
           - multidbcontext
 networks:
