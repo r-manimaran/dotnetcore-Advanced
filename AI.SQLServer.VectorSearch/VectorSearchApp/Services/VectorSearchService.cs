@@ -1,6 +1,6 @@
 ﻿namespace VectorSearchApp.Services;
 
-public class VectorSearchService
+public class VectorSearchService : IVectorSearchService
 {
 
 }

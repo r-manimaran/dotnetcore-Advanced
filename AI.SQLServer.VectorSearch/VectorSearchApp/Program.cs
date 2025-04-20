@@ -1,9 +1,21 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using VectorSearchApp.Components;
 using VectorSearchApp.Data;
+using VectorSearchApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddEndpointsApiExplorer(); // Add this line
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Vector Search API",
+        Version = "v1",
+        Description = "API for vector-based document search"
+    });
+});
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -27,6 +39,10 @@ builder.Services.AddHybridCache(options =>
     };
 });
 
+builder.Services.AddScoped<IDocumentService, DocumentService>();
+
+builder.Services.AddScoped<IVectorSearchService, VectorSearchService>();
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -36,8 +52,19 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+//app.UseSwaggerUI(options =>
+//    options.SwaggerEndpoint("/openapi/v1.json", "OpenApi v1"));
 
+app.UseSwagger();
+
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Vector Search API v1");
+});
+
+app.MapEndpoints();
+
+app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
