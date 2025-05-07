@@ -14,4 +14,6 @@ DotNet Solutions - Advanced Topics Learning
    - **Description**: Lambda expression Extensions methods
    - **Link**: [ClickHere](https://github.com/r-manimaran/dotnetcore-Advanced/tree/master/LambdaExpressionApp)
 -----------------------------------------------
-
+   - **Name**: RedoisTTLTriggerApp
+   - **Description**: Set Redis TTL and Trigger after Timeout 
+   - **Link**: [ClickHere](https://github.com/r-manimaran/dotnetcore-Advanced/tree/master/RedisTTLTriggerApp)
