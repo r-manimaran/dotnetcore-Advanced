@@ -1,0 +1,122 @@
+[
+  {
+    "hotel_name": "Seaside Haven Resort",
+    "description": "A luxurious beachfront resort with ocean views and private villas.",
+    "location": "Malibu, California",
+    "features": "Oceanfront, Private Pool, Spa, Fine Dining",
+    "best_customer_review": "The private villa was stunning, and the view of the sunset was unforgettable!",
+    "worst_customer_review": "Check-in took too long and the Wi-Fi was unreliable."
+  },
+  {
+    "hotel_name": "Mountain Escape Lodge",
+    "description": "Rustic lodge nestled in the Rockies, ideal for nature lovers.",
+    "location": "Aspen, Colorado",
+    "features": "Fireplace, Hiking Trails, Ski-In/Ski-Out, Hot Tub",
+    "best_customer_review": "Perfect winter getaway with cozy rooms and amazing trails.",
+    "worst_customer_review": "Room heating was inconsistent during our stay."
+  },
+  {
+    "hotel_name": "CityLights Boutique Hotel",
+    "description": "Modern boutique hotel in the heart of the city with rooftop views.",
+    "location": "New York, New York",
+    "features": "Rooftop Bar, Free Wi-Fi, Gym, Art Gallery",
+    "best_customer_review": "Loved the vibe and the rooftop bar was amazing!",
+    "worst_customer_review": "Room was smaller than expected."
+  },
+  {
+    "hotel_name": "The Grand Heritage Palace",
+    "description": "Historic hotel offering royal treatment in a palatial setting.",
+    "location": "Jaipur, India",
+    "features": "Heritage Suites, Garden Restaurant, Cultural Events",
+    "best_customer_review": "Felt like royalty! Truly a unique experience.",
+    "worst_customer_review": "The AC was a bit noisy at night."
+  },
+  {
+    "hotel_name": "Rainforest Retreat",
+    "description": "Eco-friendly resort located deep in the Amazon rainforest.",
+    "location": "Manaus, Brazil",
+    "features": "Nature Walks, Local Cuisine, River Tours",
+    "best_customer_review": "Incredible experience being so close to nature.",
+    "worst_customer_review": "Too many mosquitoes and no hot water."
+  },
+  {
+    "hotel_name": "Urban Nest Hotel",
+    "description": "Compact and stylish rooms for the modern traveler.",
+    "location": "Tokyo, Japan",
+    "features": "Smart Rooms, 24h Concierge, Onsen",
+    "best_customer_review": "Efficient use of space and great amenities!",
+    "worst_customer_review": "Elevator wait times were frustrating."
+  },
+  {
+    "hotel_name": "Desert Dune Resort",
+    "description": "A luxurious resort in the desert with stunning night skies.",
+    "location": "Dubai, UAE",
+    "features": "Camel Rides, Desert Safari, Infinity Pool",
+    "best_customer_review": "The night sky and dunes were breathtaking.",
+    "worst_customer_review": "Expensive meals and limited vegetarian options."
+  },
+  {
+    "hotel_name": "Northern Lights Inn",
+    "description": "A cozy inn ideal for viewing the Northern Lights.",
+    "location": "Reykjavik, Iceland",
+    "features": "Aurora Viewing Deck, Sauna, Guided Tours",
+    "best_customer_review": "We saw the Northern Lights two nights in a row!",
+    "worst_customer_review": "Rooms were a bit small for families."
+  },
+  {
+    "hotel_name": "Canal View Hotel",
+    "description": "Charming hotel overlooking the iconic canals.",
+    "location": "Amsterdam, Netherlands",
+    "features": "Canal View Rooms, Bike Rentals, Local Art Decor",
+    "best_customer_review": "Gorgeous views and close to everything.",
+    "worst_customer_review": "No elevator and steep stairs."
+  },
+  {
+    "hotel_name": "Safari Plains Lodge",
+    "description": "Adventure lodge located near a wildlife reserve.",
+    "location": "Nairobi, Kenya",
+    "features": "Safari Tours, Campfire Dining, Wildlife Watching",
+    "best_customer_review": "Saw lions up close! The guides were excellent.",
+    "worst_customer_review": "Water pressure in the showers was low."
+  },
+  {
+    "hotel_name": "Coastal Charm Inn",
+    "description": "Small family-run inn with ocean views and homemade breakfasts.",
+    "location": "Charleston, South Carolina",
+    "features": "Ocean Views, Homemade Breakfast, Porch Swings",
+    "best_customer_review": "Felt like home away from home!",
+    "worst_customer_review": "Limited parking space."
+  },
+  {
+    "hotel_name": "Alpine Peaks Resort",
+    "description": "A scenic resort surrounded by snow-covered peaks.",
+    "location": "Zermatt, Switzerland",
+    "features": "Ski Access, Heated Pools, Fine Dining",
+    "best_customer_review": "Best ski holiday we've had, bar none!",
+    "worst_customer_review": "Restaurant menu lacked vegetarian options."
+  },
+  {
+    "hotel_name": "Harborview Marina Hotel",
+    "description": "Waterfront hotel offering access to the marina and sailing tours.",
+    "location": "Vancouver, Canada",
+    "features": "Marina Access, Seafood Restaurant, Spa",
+    "best_customer_review": "Loved the sailing tours and fresh seafood.",
+    "worst_customer_review": "The room AC unit was loud at night."
+  },
+  {
+    "hotel_name": "Lake Serenity Lodge",
+    "description": "Peaceful lakeside lodge with paddle boats and fishing spots.",
+    "location": "Queenstown, New Zealand",
+    "features": "Lake Access, Kayaking, Picnic Area",
+    "best_customer_review": "Perfect for a quiet weekend away.",
+    "worst_customer_review": "Wi-Fi only worked in common areas."
+  },
+  {
+    "hotel_name": "Old Town Inn",
+    "description": "Quaint hotel in a historic building in the city center.",
+    "location": "Prague, Czech Republic",
+    "features": "Historic Architecture, Walking Distance to Attractions, Free Breakfast",
+    "best_customer_review": "Great location and very charming atmosphere.",
+    "worst_customer_review": "No air conditioning during summer."
+  }
+]
