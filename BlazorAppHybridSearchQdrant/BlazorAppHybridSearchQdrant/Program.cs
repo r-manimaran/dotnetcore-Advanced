@@ -1,5 +1,8 @@
 using BlazorAppHybridSearchQdrant.Components;
 using BlazorAppHybridSearchQdrant.Models;
+using BlazorAppHybridSearchQdrant.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +14,15 @@ builder.Services.AddRazorComponents()
 
 var kernelBuilder = builder.Services.AddKernel();
 kernelBuilder.AddQdrantVectorStoreRecordCollection<Guid, ResortDataForVector>(config["AppSettings:QdrantCollectionName"] ?? "", "localhost");
+
+// Register the OllamaEmbeddingGenerator
+string modelId = config["AppSettings:ModelId"] ?? "";
+Uri endpoint = new(config["AppSettings:Endpoint"] ?? "");
+builder.Services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(
+    sp => new OllamaEmbeddingGenerator(endpoint, modelId));
+
+builder.Services.AddSingleton<IDataService, DataService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

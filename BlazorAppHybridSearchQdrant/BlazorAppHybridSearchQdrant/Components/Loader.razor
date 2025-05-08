@@ -1,0 +1,16 @@
+﻿<h3>Loader</h3>
+@if (Loading)
+{
+    <progress></progress>
+}
+else
+{
+    @ChildContent
+}
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public bool Loading { get; set; }
+}
