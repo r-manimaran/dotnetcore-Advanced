@@ -2,14 +2,14 @@
 using RabbitMQ.Client.Events;
 using System.Text;
 
-Console.WriteLine("Consumer App 1:");
+Console.WriteLine("Consumer App 2:");
 
 var factory = new ConnectionFactory { HostName = "localhost" };
 using var connection = await factory.CreateConnectionAsync();
 using var channel = await connection.CreateChannelAsync();
 
 await channel.QueueDeclareAsync(
-    queue: "messages-1",
+    queue: "messages-2",
     durable: true,
     exclusive: false,
     autoDelete: false,
@@ -28,10 +28,6 @@ consumer.ReceivedAsync += async (sender, eventArgs) =>
     await ((AsyncEventingBasicConsumer)sender).Channel.BasicAckAsync(eventArgs.DeliveryTag, multiple: false);
 };
 
-await channel.BasicConsumeAsync("messages-1",autoAck: false, consumer);
+await channel.BasicConsumeAsync("messages-2", autoAck: false, consumer);
 
 Console.ReadLine();
-Task Consumer_ReceivedAsync(object sender, BasicDeliverEventArgs @event)
-{
-    throw new NotImplementedException();
-}

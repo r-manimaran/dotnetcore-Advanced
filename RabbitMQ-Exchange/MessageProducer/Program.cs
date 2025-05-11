@@ -8,7 +8,14 @@ using var connection = await factory.CreateConnectionAsync();
 using var channel = await connection.CreateChannelAsync();
 
 await channel.QueueDeclareAsync(
-    queue: "messages",
+    queue: "messages-1",
+    durable: true,
+    exclusive: false,
+    autoDelete: false,
+    arguments: null);
+
+await channel.QueueDeclareAsync(
+    queue: "messages-2",
     durable: true,
     exclusive: false,
     autoDelete: false,
@@ -23,7 +30,14 @@ for(int i=0;i<10; i++)
 
     await channel.BasicPublishAsync(
         exchange: string.Empty,
-        routingKey: "messages",
+        routingKey: "messages-1",
+        mandatory: true,
+        basicProperties: new BasicProperties { Persistent = true },
+        body: body);
+
+    await channel.BasicPublishAsync(
+        exchange: string.Empty,
+        routingKey: "messages-2",
         mandatory: true,
         basicProperties: new BasicProperties { Persistent = true },
         body: body);
