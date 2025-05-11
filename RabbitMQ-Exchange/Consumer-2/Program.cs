@@ -7,6 +7,11 @@ Console.WriteLine("Consumer App 2:");
 var factory = new ConnectionFactory { HostName = "localhost" };
 using var connection = await factory.CreateConnectionAsync();
 using var channel = await connection.CreateChannelAsync();
+await channel.ExchangeDeclareAsync(
+    exchange: "messages",
+    durable: true,
+    autoDelete: false,
+    type: ExchangeType.Fanout);
 
 await channel.QueueDeclareAsync(
     queue: "messages-2",
@@ -15,7 +20,9 @@ await channel.QueueDeclareAsync(
     autoDelete: false,
     arguments: null);
 
-Console.WriteLine("Waiting for the messages...");
+await channel.QueueBindAsync("messages-2", "messages", string.Empty);
+
+Console.WriteLine("Waiting for the messages from Queue messages-2...");
 
 var consumer = new AsyncEventingBasicConsumer(channel);
 consumer.ReceivedAsync += async (sender, eventArgs) =>
