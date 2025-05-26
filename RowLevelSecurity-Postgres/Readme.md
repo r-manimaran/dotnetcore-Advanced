@@ -86,3 +86,13 @@ SELECT * FROM "Notes";
 - Query planner
 
 ![alt text](image-8.png)
+
+- After Implementing Connection Interceptor and set app_user role based on logged in user in Jwt token
+
+![alt text](image-9.png)
+
+![Traces](image-10.png)
+
+![alt text](image-11.png)
+
+![alt text](image-12.png)

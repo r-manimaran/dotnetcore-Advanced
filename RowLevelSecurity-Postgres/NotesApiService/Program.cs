@@ -13,11 +13,17 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
 
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddSingleton<UserSessionInterceptor>();
+
 builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+
+    options.AddInterceptors(sp.GetRequiredService<UserSessionInterceptor>());
 });
 
 var app = builder.Build();
