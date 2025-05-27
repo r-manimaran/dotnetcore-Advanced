@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Diagnostics;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Security.Claims;
 
 namespace NotesApiService.Data;
@@ -11,6 +12,10 @@ public class UserSessionInterceptor(IHttpContextAccessor httpContextAccessor): D
                     ConnectionEndEventData eventData, 
                     CancellationToken cancellationToken = default)
     {
+        // Start a trace activity
+        using var activity = new Activity("SetUserSessionOnConnection");
+        activity.Start();
+
         var userId = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
            // ?? throw new InvalidOperationException("User session not found.");
 
@@ -24,7 +29,11 @@ public class UserSessionInterceptor(IHttpContextAccessor httpContextAccessor): D
 
             await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
 
+            // Add userId as a tag to the activity for observability
+            activity?.AddTag("db.user_id", userId);
         }
+        activity?.Stop();
+
         await base.ConnectionOpenedAsync(connection, eventData, cancellationToken);
     }
 

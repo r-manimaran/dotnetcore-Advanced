@@ -1,37 +1,46 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NotesApiService.Data;
 using NotesApiService.Models;
+using System.Diagnostics;
 using System.Security.Claims;
 
 namespace NotesApiService.Endpoints;
 
 public static class NotesEndpoints
 {
+    private static readonly ActivitySource ActivitySource = new("NotesApiService");
     public static void MapNotesEndpoints(this IEndpointRouteBuilder route)
     {
         var app = route.MapGroup("/notes").WithTags("Notes");
 
         app.MapGet("/", async (ClaimsPrincipal claimsPrincipal, ApplicationDbContext db) =>
         {
+            using var activity = ActivitySource.StartActivity("NotesApiService.GetNotes");
             var userId = int.Parse(claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            activity?.AddTag("user.id", userId);
+            activity?.AddTag("notes.action", "list");
 
             var notes = await db.Notes
                                 //.Where(n=> n.UserId == userId)
                                 .OrderByDescending(n=> n.UpdatedAt)
                                 .ToListAsync();
 
-
+            activity?.Stop();
             return Results.Ok(notes);
         });
 
         app.MapGet("/{id}", async (int id, ClaimsPrincipal claimsPrincipal, ApplicationDbContext db) =>
         {
+            using var activity = ActivitySource.StartActivity("NotesApiService.GetNoteById");
             var userId = int.Parse(claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier)!);
-           
+            activity?.AddTag("user.id", userId);
+            activity?.AddTag("note.id", id);
+            activity?.AddTag("notes.action", "get");
+
             var note = await db.Notes
                                .Where(n => n.UserId == userId)
                                .FirstOrDefaultAsync(n => n.Id == id);
-                        
+            activity?.Stop();
             if (note is null)
                 return Results.NotFound();
 
