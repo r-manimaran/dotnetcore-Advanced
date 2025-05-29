@@ -14,6 +14,10 @@ DotNet Solutions - Advanced Topics Learning
    - **Description**: Lambda expression Extensions methods
    - **Link**: [ClickHere](https://github.com/r-manimaran/dotnetcore-Advanced/tree/master/LambdaExpressionApp)
 -----------------------------------------------
-   - **Name**: RedoisTTLTriggerApp
+   - **Name**: RedisTTLTriggerApp
    - **Description**: Set Redis TTL and Trigger after Timeout 
    - **Link**: [ClickHere](https://github.com/r-manimaran/dotnetcore-Advanced/tree/master/RedisTTLTriggerApp)
+-----------------------------------------------
+   - **Name**: RowLevelSecurity-Postgres
+   - **Description**: Apply Row Level Security in the Postgres sql database and accessing the records in .Net Web API
+   - **Link**: [ClickHere](https://github.com/r-manimaran/dotnetcore-Advanced/tree/master/RowLevelSecurity-Postgres)
