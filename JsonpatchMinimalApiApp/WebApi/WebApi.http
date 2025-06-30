@@ -1,0 +1,66 @@
+@WebApi_HostAddress = https://localhost:7082
+# 1. Replace a value
+PATCH {{WebApi_HostAddress}}/policies/update/2
+content-type:application/json-patch+json
+[{
+    "op":"replace",
+    "path":"/customerName",
+    "value":"Customer2 updated"
+}]
+
+###
+# 2. Add a new Property or array
+PATCH {{WebApi_HostAddress}}/policies/update/2
+content-type:application/json-patch+json
+
+[{
+    "op":"add", 
+    "path":"/policynumber",
+    "value":"PN-12345"
+}]
+
+###
+# 3. Remove a property
+PATCH {{WebApi_HostAddress}}/policies/update/2
+content-type:application/json-patch+json
+
+[{
+    "op":"remove",
+    "path":"/policyNumber"
+}]
+###
+# 4. Move a value from one property to another
+PATCH {{WebApi_HostAddress}}/policies/update/2
+content-type:application/json-patch+json
+[
+    {
+        "op":"move",
+        "from":"/customerName",
+        "path": "/policyHolder"
+    }
+]
+
+###
+# 5. Copy a value from one peoperty to another
+PATCH {{WebApi_HostAddress}}/policies/update/2
+content-type:application/json-patch+json
+[
+    {
+        "op":"copy",
+        "from":"/customerName",
+        "path":"/previousCustomerName"
+    }
+]
+
+###
+# 6. Test a value before applying other operations ((useful for concurrency)
+PATCH {{WebApi_HostAddress}}/policies/update/2
+content-type: application/json-patch+json
+
+[{
+    "op":"test",
+    "path":"/customerName",
+    "value":"Customer 2"
+}]
+
+###
