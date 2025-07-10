@@ -5,9 +5,11 @@ A .NET 9 Minimal API demonstrating secure cookie-based authentication with compr
 ## Features
 
 - **Cookie Authentication**: Secure session-based authentication
-- **Authorization**: Protected endpoints with claims-based access
+- **Role-Based Authorization**: Policy-driven access control with hierarchical roles
+- **Authorization Policies**: Custom policies for different access levels
+- **Claims-Based Security**: User roles stored as claims
 - **Security**: HttpOnly, Secure, SameSite cookie policies
-- **Swagger/OpenAPI**: Interactive API documentation
+- **Swagger/OpenAPI**: Interactive API documentation with security metadata
 - **Sliding Expiration**: Automatic session extension on activity
 
 ## Project Structure
@@ -24,11 +26,15 @@ WebApi/
 
 ## API Endpoints
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| POST | `/login` | User authentication | No |
-| GET | `/secure` | Protected resource | Yes |
-| POST | `/logout` | User logout | No |
+| Method | Endpoint | Description | Auth Required | Role Required |
+|--------|----------|-------------|---------------|---------------|
+| POST | `/login` | User authentication | No | - |
+| GET | `/secure` | Protected resource | Yes | Any authenticated user |
+| POST | `/logout` | User logout | No | - |
+| GET | `/managearea` | Area management (Policy) | Yes | AreaManager |
+| GET | `/managestore` | Store management (Policy) | Yes | StoreManager, AreaManager |
+| GET | `/managearea2` | Area management (Direct) | Yes | AreaManager |
+| GET | `/managestore2` | Store management (Attribute) | Yes | StoreManager, AreaManager |
 
 ## Getting Started
 
@@ -54,7 +60,7 @@ WebApi/
    https://localhost:5001/swagger
    ```
 
-## Authentication Flow
+## Authentication & Authorization Flow
 
 ### Login
 ```http
@@ -67,10 +73,22 @@ Content-Type: application/json
   "rememberMe": false
 }
 ```
+**Response**: Sets `AppCookie` with user claims including `StoreManager` role
 
 ### Access Protected Resource
 ```http
 GET /secure
+Cookie: AppCookie=<session-cookie>
+```
+
+### Role-Based Endpoints
+```http
+# Store Management (StoreManager or AreaManager)
+GET /managestore
+Cookie: AppCookie=<session-cookie>
+
+# Area Management (AreaManager only)
+GET /managearea
 Cookie: AppCookie=<session-cookie>
 ```
 
@@ -82,15 +100,35 @@ Cookie: AppCookie=<session-cookie>
 
 ## Security Configuration
 
+### Cookie Settings
 - **Cookie Name**: `AppCookie`
 - **Expiration**: 10 minutes with sliding expiration
 - **Security**: HTTPS only, HttpOnly, SameSite Strict
 - **Unauthorized Response**: 401 status (no redirects)
+- **Access Denied Response**: 403 status (no redirects)
+
+### Authorization Policies
+- **AreaManagement**: Requires `AreaManager` role
+- **StoreManagement**: Requires `StoreManager` or `AreaManager` role
+- **Role Hierarchy**: AreaManager > StoreManager
+
+### Implementation Approaches
+1. **Policy-based**: `.RequireAuthorization("PolicyName")`
+2. **Direct role check**: `.RequireAuthorization(policy => policy.RequireRole("Role"))`
+3. **Attribute-based**: `[Authorize(Roles = "Role1, Role2")]`
 
 ## Test Credentials
 
 - **Username**: `test`
 - **Password**: `password`
+- **Assigned Role**: `StoreManager`
+
+### Role Access Matrix
+| Endpoint | StoreManager | AreaManager |
+|----------|--------------|-------------|
+| `/secure` | ✅ | ✅ |
+| `/managestore` | ✅ | ✅ |
+| `/managearea` | ❌ | ✅ |
 
 ## Dependencies
 
