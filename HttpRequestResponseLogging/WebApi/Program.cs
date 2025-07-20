@@ -46,6 +46,8 @@ builder.Services.AddHttpLogging(options =>
 // Register the CustomLoggingInterceptor
 builder.Services.AddSingleton<IHttpLoggingInterceptor, CustomLoggingInterceptor>();
 
+builder.Services.AddSingleton<IHttpLoggingInterceptor, SensitiveDataReductionInterceptor>();
+
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
