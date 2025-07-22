@@ -48,6 +48,16 @@ builder.Services.AddSingleton<IHttpLoggingInterceptor, CustomLoggingInterceptor>
 
 builder.Services.AddSingleton<IHttpLoggingInterceptor, SensitiveDataReductionInterceptor>();
 
+// HttpClient Logging
+builder.Services.AddHttpClient<ITodoClient, TodoClient>(client =>
+{
+    client.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/");
+}).AddHttpMessageHandler(configure =>
+{
+    var logger = configure.GetRequiredService<ILoggerFactory>().CreateLogger("json-placeholder-todos");
+    return new HttpLoggingHandler(logger);
+});
+
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
