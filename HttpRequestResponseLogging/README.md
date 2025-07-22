@@ -11,6 +11,7 @@ This project demonstrates how to implement HTTP request and response logging in 
 - API endpoints for demonstration
 - API Key authentication using custom middleware
 - Custom HTTP logging interceptors for sensitive data handling
+- HTTP client logging with DelegatingHandler
 
 ## Project Structure
 
@@ -19,6 +20,9 @@ This project demonstrates how to implement HTTP request and response logging in 
   - DTO - Data Transfer Objects
   - Middleware - Custom middleware components
   - Interceptors - HTTP logging interceptors
+  - Clients - HTTP client implementations
+  - Handlers - HTTP message handlers
+  - Models - Data models
 
 ## Configuration
 
@@ -53,11 +57,21 @@ The application implements multiple logging interceptors:
    - Redacts request and response headers
    - Enriches logs with additional custom fields
 
+### HTTP Client Logging
+
+The application demonstrates HTTP client logging:
+
+- `HttpLoggingHandler` - A DelegatingHandler that logs outgoing HTTP requests and responses
+- `TodoClient` - A typed HTTP client that consumes an external API
+- Automatic API key inclusion in outgoing requests
+- Proper error handling and response processing
+
 ## API Endpoints
 
 - `/weatherforecast` - GET endpoint that returns weather forecast data
 - `/api/users/login` - POST endpoint for user login (accepts LoginModel in request body)
 - `/api/users/logout` - GET endpoint for user logout
+- `/api/todos` - CRUD endpoints for todo items (proxied to external API)
 
 ## Usage
 
@@ -73,4 +87,5 @@ The application implements multiple logging interceptors:
 - .NET 9.0
 - ASP.NET Core
 - HttpLogging middleware
+- HttpClient factory
 - OpenAPI/Swagger

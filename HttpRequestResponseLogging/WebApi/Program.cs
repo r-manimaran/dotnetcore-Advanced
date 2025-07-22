@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.Extensions.DependencyInjection;
+using WebApi.Clients;
 using WebApi.Endpoints;
+using WebApi.Handlers;
 using WebApi.Interceptors;
 using WebApi.Middleware;
+using HttpLoggingHandler = WebApi.Middleware.HttpLoggingHandler;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,11 +55,11 @@ builder.Services.AddSingleton<IHttpLoggingInterceptor, SensitiveDataReductionInt
 builder.Services.AddHttpClient<ITodoClient, TodoClient>(client =>
 {
     client.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/");
-}).AddHttpMessageHandler(configure =>
-{
-    var logger = configure.GetRequiredService<ILoggerFactory>().CreateLogger("json-placeholder-todos");
-    return new HttpLoggingHandler(logger);
-});
+    client.DefaultRequestHeaders.Add("X-API-Key", builder.Configuration["ApiKey"]);
+}).AddHttpMessageHandler<HttpLoggingHandler>();
+
+// Register HttpLoggingHandler
+builder.Services.AddTransient<HttpLoggingHandler>();
 
 builder.Services.AddOpenApi();
 
@@ -93,6 +96,7 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 });
 app.MapUserEndpoints();
+app.MapTodoEndpoints();
 
 app.Run();
 
