@@ -1,0 +1,6 @@
+@EFCore.NamingQueryFilters_HostAddress = http://localhost:5058
+
+GET {{EFCore.NamingQueryFilters_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
