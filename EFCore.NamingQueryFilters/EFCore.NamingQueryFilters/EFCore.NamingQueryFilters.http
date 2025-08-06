@@ -1,6 +1,4 @@
-@EFCore.NamingQueryFilters_HostAddress = http://localhost:5058
+@EFCore.NamingQueryFilters_HostAddress = https://localhost:7138
 
-GET {{EFCore.NamingQueryFilters_HostAddress}}/weatherforecast/
-Accept: application/json
-
+GET {{EFCore.NamingQueryFilters_HostAddress}}/products
 ###
