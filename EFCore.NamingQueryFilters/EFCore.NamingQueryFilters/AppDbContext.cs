@@ -14,12 +14,15 @@ public class AppDbContext: DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Product>()
-                    .HasQueryFilter(p => p.IsActive) // This will be excluded
-                    .HasQueryFilter(p=>p.Price >10); // This will be used in the Query filter
-
-        // Alternative way to set multiple filters
-        modelBuilder.Entity<Product>()
-            .HasQueryFilter(p => p.IsActive && p.Price > 10);
+                    .HasQueryFilter(ProductFilters.ActiveFilter, p=> p.IsActive) 
+                    .HasQueryFilter(ProductFilters.PriceFilter, p=>p.Price >10); 
+               
 
     }
+}
+
+public static class ProductFilters
+{
+    public const string ActiveFilter = "ActiveFilter";
+    public const string PriceFilter = "PriceFilter";
 }

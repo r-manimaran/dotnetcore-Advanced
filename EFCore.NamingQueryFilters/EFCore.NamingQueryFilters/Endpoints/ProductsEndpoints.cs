@@ -24,5 +24,24 @@ public static class ProductsEndpoints
         })
         .WithName("GetProductById")
         .WithTags("Products");
+
+        app.MapGet("/products-unfiltered", async (AppDbContext db) =>
+        {
+            // This endpoint does not apply the query filters
+            return await db.Products.IgnoreQueryFilters().ToListAsync();
+        }).WithName("GetAllProductsUnfiltered")
+          .WithTags("Products");
+
+        app.MapGet("/products-pricefiltered", async (AppDbContext db) =>
+        {
+           return await db.Products.IgnoreQueryFilters([ProductFilters.ActiveFilter]).ToListAsync();
+        }).WithName("GetAllProductsIsActiveFiltered")
+          .WithTags("Products");
+
+        app.MapGet("/products-activefiltered", async (AppDbContext db) =>
+        {
+            return await db.Products.IgnoreQueryFilters([ProductFilters.PriceFilter]).ToListAsync();
+        }).WithName("GetAllProductsPriceFiltered")
+          .WithTags("Products");
     }
 }

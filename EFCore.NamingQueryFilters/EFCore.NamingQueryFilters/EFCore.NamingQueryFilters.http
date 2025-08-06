@@ -1,4 +1,16 @@
 @EFCore.NamingQueryFilters_HostAddress = https://localhost:7138
 
+# Use both the filters
 GET {{EFCore.NamingQueryFilters_HostAddress}}/products
 ###
+
+# Ignore the Query Filter
+GET {{EFCore.NamingQueryFilters_HostAddress}}/products-unfiltered
+
+###
+# Ignore the IsActive filter and have Price Filter alone
+GET {{EFCore.NamingQueryFilters_HostAddress}}/products-pricefiltered
+
+###
+# Ignore Price filter and have only IsActive Filter
+GET {{EFCore.NamingQueryFilters_HostAddress}}/products-activefiltered
