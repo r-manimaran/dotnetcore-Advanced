@@ -68,6 +68,35 @@ WHERE [p].[IsActive] = CAST(1 AS bit)
 ![Filtered Query Result](image.png)
 *IsActive Filtered Output*
 
+- If the Query filter was set like below with multiple Query filter, EFCore 9 will take the last Query filter and return the result
+
+```csharp
+ protected override void OnModelCreating(ModelBuilder modelBuilder)
+ {
+     modelBuilder.Entity<Product>()
+                 .HasQueryFilter(p => p.IsActive) // This will be excluded
+                 .HasQueryFilter(p=>p.Price >10); // This will be used in the Query filter
+ }
+```
+```sql
+SELECT [p].[Id], [p].[CreatedAt], [p].[IsActive], [p].[Name], [p].[Price]
+FROM [Products] AS [p]
+WHERE [p].[Price] > 10.0
+```
+
+```csharp
+        // Alternative way to set multiple filters
+        modelBuilder.Entity<Product>()
+            .HasQueryFilter(p => p.IsActive && p.Price > 10);
+```
+- So the option is to include both Query Filter or Anyone.
+
+```sql
+SELECT [p].[Id], [p].[CreatedAt], [p].[IsActive], [p].[Name], [p].[Price]
+FROM [Products] AS [p]
+WHERE [p].[IsActive] = CAST(1 AS bit) AND [p].[Price] > 10.0
+```
+
 ## Key Dependencies
 
 - Microsoft.EntityFrameworkCore 9.0.8
