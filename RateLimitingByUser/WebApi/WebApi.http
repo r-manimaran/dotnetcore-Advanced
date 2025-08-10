@@ -1,0 +1,17 @@
+@WebApi_HostAddress = https://localhost:7276
+@WebApi_AccessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InJtYW5pIiwic3ViIjoicm1hbmkiLCJqdGkiOiI5NWIwNDhmZCIsImF1ZCI6WyJodHRwOi8vbG9jYWxob3N0OjUyNjgiLCJodHRwczovL2xvY2FsaG9zdDo3Mjc2Il0sIm5iZiI6MTc1NDgzMjQ3NCwiZXhwIjoxNzYyNzgxMjc0LCJpYXQiOjE3NTQ4MzI0NzUsImlzcyI6ImRvdG5ldC11c2VyLWp3dHMifQ.X6v_tb3N0gwLkGYtLo25peb58pX0Uq8MBwb4JHcTmGI
+@WebApi_AccessToken_WithUserIdClaim =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InJtYW5pIiwic3ViIjoicm1hbmkiLCJqdGkiOiJlMWVkMGQwMiIsInVzZXJJZCI6IjEyMyIsImF1ZCI6WyJodHRwOi8vbG9jYWxob3N0OjUyNjgiLCJodHRwczovL2xvY2FsaG9zdDo3Mjc2Il0sIm5iZiI6MTc1NDgzMzE5NSwiZXhwIjoxNzYyNzgxOTk1LCJpYXQiOjE3NTQ4MzMxOTYsImlzcyI6ImRvdG5ldC11c2VyLWp3dHMifQ.knNigiBIPhCSKH9SdED66Hey8QGSslH0PhVAiPf96Gs
+
+
+GET {{WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+Authorization: Bearer {{WebApi_AccessToken}}
+###
+
+GET {{WebApi_HostAddress}}/weatherforecast-minimal
+Accept: application/json
+Authorization: Bearer {{WebApi_AccessToken}}
+###
+GET {{WebApi_HostAddress}}/weatherforecast-minimal
+Accept: application/json
+Authorization: Bearer {{WebApi_AccessToken_WithUserIdClaim}}
