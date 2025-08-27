@@ -14,12 +14,14 @@ public class EventHubService : IEventHubService, IAsyncDisposable
 {
     private readonly EventHubProducerClient _producer;
     private readonly string _eventHubName;
+
     public EventHubService(IConfiguration configuration)
     {
         var connectionString = configuration["Azure:EventHubConnectionString"];
-        _eventHubName = configuration["Azure:EventHubName"];
-        _producer = new EventHubProducerClient(connectionString, _eventHubName);
 
+        _eventHubName = configuration["Azure:EventHubName"] ?? "ShopHub";
+
+        _producer = new EventHubProducerClient(connectionString, _eventHubName);
     }
 
     public async ValueTask DisposeAsync()

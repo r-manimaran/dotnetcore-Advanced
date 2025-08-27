@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "ShopHub.OrdersToCosmos": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7058"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "containerRunArguments": "--init",
+      "httpPort": 32001,
+      "useSSL": false
+    }
+  }
+}
