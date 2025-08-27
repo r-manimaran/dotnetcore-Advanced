@@ -1,4 +1,5 @@
 ﻿
+using ShopHub.Contracts.Events;
 using System.Text.Json;
 
 namespace ShopHub.WebApi.Services;
@@ -7,23 +8,38 @@ public class MultiCloudEventPublisher : IEventPublisher
 {
     private readonly IKinesisService _kinesisService;
     private readonly IEventHubService _eventHubService;
+    private readonly ILogger<MultiCloudEventPublisher> _logger;
 
-    public MultiCloudEventPublisher(IKinesisService kinesisService, IEventHubService eventHubService)
+    public MultiCloudEventPublisher(IKinesisService kinesisService, IEventHubService eventHubService, ILogger<MultiCloudEventPublisher> logger)
     {
         _kinesisService = kinesisService;
         _eventHubService = eventHubService;
-    }
-    public async Task PublishAsync(string eventType, object data)
-    {
-        var eventPayload = JsonSerializer.Serialize(new
-        {
-            EventType = eventType,
-            TimeStamp = DateTime.UtcNow,
-            Data = data
-        });
+        _logger = logger;
+    }   
 
-        await Task.WhenAll(
-            _kinesisService.SendAsync(eventPayload),
-            _eventHubService.SendAsync(eventPayload));
+    public async Task PublishAsync<T>(EventEnvelope<T> env, CancellationToken ct=default)
+    {
+        var eventPayload = JsonSerializer.Serialize(env);
+
+        var tasks = new[]
+        {
+            PublishToServiceAsync("Kinesis", () => _kinesisService.SendAsync(env.PartitionKey,eventPayload,ct)),
+            PublishToServiceAsync("EventHub", () => _eventHubService.SendAsync(env.PartitionKey,eventPayload, ct))
+        };
+
+        await Task.WhenAll(tasks);
+    }
+    
+    private async Task PublishToServiceAsync(string serviceName, Func<Task> publishAction)
+    {
+        try
+        {
+            await publishAction();
+            _logger.LogInformation("Successfully published to {ServiceName}", serviceName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to publish to {ServiceName}", serviceName);
+        }
     }
 }

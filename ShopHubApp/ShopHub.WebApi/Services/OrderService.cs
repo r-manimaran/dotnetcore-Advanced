@@ -1,12 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ShopHub.Contracts.Enums;
+using ShopHub.Contracts.Events;
 using ShopHub.Contracts.Models;
 using ShopHub.WebApi.Common;
 using ShopHub.WebApi.Data;
 
 namespace ShopHub.WebApi.Services;
 
-public class OrderService(AppDbContext dbContext, ILogger<OrderService> logger) : IOrderService
+public class OrderService(AppDbContext dbContext, IEventPublisher publisher, ILogger<OrderService> logger) : IOrderService
 {    
     public async Task<ServiceResult<Order>> CreateAsync(Order order, CancellationToken cancellationToken = default)
     {
@@ -14,6 +15,33 @@ public class OrderService(AppDbContext dbContext, ILogger<OrderService> logger) 
         order.CreatedOnUtc = DateTime.UtcNow;
         dbContext.Orders.Add(order);
         await dbContext.SaveChangesAsync();
+
+        logger.LogInformation($"Stored the Order: {order.Id} in the Database successfully");
+        
+        // Publish the Order Created Event
+        var newOrderEvent = new OrderCreatedV1(
+            OrderId: order.Id,
+            UserId: order.UserId,
+            TotalAmount: order.TotalAmount,
+            Currency: order.Currency,
+            ProductIds: order.Items.Select(x => x.ProductId).ToArray(),
+            Quantities: order.Items.ToDictionary(i => i.ProductId, i => i.Quantity),
+            Channel: "Web", // Web or Mobile App
+            Region: "us-east",
+            createdUtc: DateTime.UtcNow);
+
+        var evt = new EventEnvelope<OrderCreatedV1>(
+            MessageId: Guid.NewGuid().ToString(),
+            OccurredUtc: DateTime.UtcNow,
+            Type: nameof(OrderCreatedV1),
+            Version: 1,
+            CorrelationId: order.Id,
+            PartitionKey: order.Id,
+            Payload: newOrderEvent);
+        
+        await publisher.PublishAsync(evt);
+        
+        logger.LogInformation($"Created OrderCreatedEvent for the Order:{order.Id} successfully");
 
         logger.LogInformation($"Placed the new Order: {order.Id} successfully");
 

@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Writers;
 using ShopHub.WebApi.Data;
 
 namespace ShopHub.WebApi.Extensions;

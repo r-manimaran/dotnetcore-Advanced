@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using ShopHub.WebApi.Data;
 using ShopHub.WebApi.Services;
 using Microsoft.EntityFrameworkCore;
+using ShopHub.WebApi.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
@@ -30,6 +31,12 @@ builder.Services.AddScoped<IProductService, ProductService>();
 
 builder.Services.AddScoped<IOrderService, OrderService>();
 
+builder.Services.AddSingleton<IKinesisService, KinesisService>();
+
+builder.Services.AddSingleton<IEventHubService, EventHubService>();
+
+builder.Services.AddSingleton<IEventPublisher, MultiCloudEventPublisher>();
+
 builder.Services.AddCarter();
 
 var app = builder.Build();
@@ -46,5 +53,7 @@ app.UseHttpsRedirection();
 
 app.MapCarter();
 
-app.Run();
+await app.ApplyMigrations();
+
+await app.RunAsync();
 

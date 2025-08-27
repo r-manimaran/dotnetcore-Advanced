@@ -1,6 +1,9 @@
-﻿namespace ShopHub.WebApi.Services;
+﻿using ShopHub.Contracts.Events;
+
+namespace ShopHub.WebApi.Services;
 
 public interface IEventPublisher
 {
-    Task PublishAsync(string eventType, object data);
+    Task PublishAsync<T>(EventEnvelope<T> envelope, CancellationToken ct=default);
+
 }

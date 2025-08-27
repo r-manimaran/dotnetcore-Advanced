@@ -6,7 +6,7 @@ namespace ShopHub.WebApi.Services;
 
 public interface IKinesisService
 {
-    Task SendAsync(string data);
+    Task SendAsync(string partitionKey, string data, CancellationToken ct);
 }
 public class KinesisService : IKinesisService
 {
@@ -14,20 +14,21 @@ public class KinesisService : IKinesisService
     private readonly string _streamName;
     public KinesisService(IConfiguration configuration)
     {
-        _streamName = configuration["AWS:KinesisStreamName"];
+        _streamName = configuration["AWS:KinesisStreamName"]?? throw new InvalidOperationException("Kinesis Stream Name is missing");
+
         _client = new AmazonKinesisClient();
     }
-    public async Task SendAsync(string data)
+    public async Task SendAsync(string partitionKey, string data, CancellationToken ct)
     {
+
         // Put Request
         var request = new PutRecordRequest
         {
             StreamName = _streamName,
-            PartitionKey = Guid.NewGuid().ToString(),
+            PartitionKey = partitionKey,
             Data = new MemoryStream(Encoding.UTF8.GetBytes(data))
 
         };
-        await _client.PutRecordAsync(request);
-           
+       // await _client.PutRecordAsync(request,ct);           
     }
 }
