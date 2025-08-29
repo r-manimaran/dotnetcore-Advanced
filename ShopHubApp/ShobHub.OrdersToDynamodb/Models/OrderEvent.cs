@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ShobHub.OrdersToDynamodb.Models;
@@ -27,5 +28,7 @@ public class OrderPayload
     public Dictionary<string, int> Quantities { get; set; }
     public string Channel { get; set; }
     public string Region { get; set; }
+
+    [JsonPropertyName("createdUtc")]  // ADD THIS LINE
     public DateTime CreatedUtc { get; set; }
 }
