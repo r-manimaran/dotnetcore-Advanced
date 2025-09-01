@@ -76,6 +76,15 @@ aws dynamodb create-table --table-name Analytics --attribute-definitions Attribu
 
 ![alt text](image-11.png)
 
+
+## Azure Event Hub
+### Published Event to EventHub
+![alt text](image-12.png)
+
+### Process Event using Azure Function
+![alt text](image-13.png)
+
+
 ## Message Brokers vs Kinesis Comparison
 
 ### Message Brokers (RabbitMQ, Apache Kafka, Azure Service Bus)
