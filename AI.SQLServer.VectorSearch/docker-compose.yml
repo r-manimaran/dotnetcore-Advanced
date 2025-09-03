@@ -1,0 +1,17 @@
+services:
+  vectorsearchapp:
+    image: ${DOCKER_REGISTRY-}vectorsearchapp
+    build:
+      context: .
+      dockerfile: VectorSearchApp/Dockerfile
+  mssql:
+    container_name: sql-server
+    image: mcr.microsoft.com/mssql/server:latest
+    restart: always
+    environment:
+        ACCEPT_EULA: "Y"
+        SA_PASSWORD: "Strong_Pa55$"
+    ports:
+     - 1433:1433
+    volumes:
+     - ./mssql:/var/opt/mssql

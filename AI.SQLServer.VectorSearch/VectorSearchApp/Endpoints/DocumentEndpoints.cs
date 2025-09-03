@@ -20,8 +20,8 @@ public class DocumentEndpoints : IEndpointRouteHandlerBuilder
             return TypedResults.Ok(documents);
 
         }).WithSummary("Gets the list of documents");
-    /*
-        documentApiGroup.MapPost(string.Empty, async (IFormCollection file, VectorSearchService vectorSearchService, CancellationToken cancellationToken,
+    
+        documentApiGroup.MapPost(string.Empty, async (IFormCollection file, [FromServices]VectorSearchService vectorSearchService, CancellationToken cancellationToken,
              [Description("The unique identifier of the document. If not provided, a new one will be generated. If you specify an existing documentId, the corresponding document will be overwritten.")] Guid? documentId = null) =>
         {
             return TypedResults.Ok();
@@ -30,7 +30,7 @@ public class DocumentEndpoints : IEndpointRouteHandlerBuilder
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .WithSummary("Uploads a Document")
         .WithDescription("Uploads a document to a SQL database and save its embedding using the native VECTOR type.The document will be indexed and used to answer questions. Currently, PDF, DOCX, TXT and MD files are supported.");
-    */
+    
 
         documentApiGroup.MapGet("{documentId:guid}/chunks", async ([FromRoute] Guid documentId,[FromServices]  DocumentService documentService, CancellationToken cancellationToken) =>
         {
