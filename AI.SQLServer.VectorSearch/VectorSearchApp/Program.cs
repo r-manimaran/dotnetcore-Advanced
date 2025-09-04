@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using VectorSearchApp.Components;
 using VectorSearchApp.Data;
+using VectorSearchApp.Extensions;
 using VectorSearchApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,6 +45,8 @@ builder.Services.AddScoped<IDocumentService, DocumentService>();
 builder.Services.AddScoped<IVectorSearchService, VectorSearchService>();
 
 var app = builder.Build();
+
+await app.ConfigureDatabaseAsync();
 
 if (!app.Environment.IsDevelopment())
 {
