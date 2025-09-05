@@ -6,16 +6,14 @@ namespace VectorSearchApp.Services;
 
 public class TokenizerService(IOptions<AzureOpenAISettings> settingsOptions) : ITokenizerService
 {
-    private readonly TiktokenTokenizer chatCompletiontokenzier
-    public int CountChatCompletionTokens(string input)
-    {
-        throw new NotImplementedException();
-    }
+    private readonly TiktokenTokenizer chatCompletiontokenzier = TiktokenTokenizer.CreateForModel(settingsOptions.Value.ChatCompletion.ModelId);
 
-    public int CountEmbeddingTokens(string input)
-    {
-        throw new NotImplementedException();
-    }
+    private readonly TiktokenTokenizer embeddingTokenzier = TiktokenTokenizer.CreateForModel(settingsOptions.Value.Embedding.ModelId); 
+    
+    public int CountChatCompletionTokens(string input) => chatCompletiontokenzier.CountTokens(input);
+    
+    public int CountEmbeddingTokens(string input) => embeddingTokenzier.CountTokens(input);
+    
 }
 
 public interface ITokenizerService

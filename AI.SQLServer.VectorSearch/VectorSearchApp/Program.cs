@@ -1,11 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.SemanticKernel;
 using VectorSearchApp.Components;
 using VectorSearchApp.Data;
 using VectorSearchApp.Extensions;
 using VectorSearchApp.Services;
+using VectorSearchApp.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true);
+
+// Add services to the container.
+//var aiSettings = builder.Services.ConfigureAndGet<AzureOpenAISettings>(builder.Configuration, "AzureOpenAI")!;
+//var appSettings = builder.Services.ConfigureAndGet<AppSettings>(builder.Configuration, nameof(AppSettings))!;
 
 builder.Services.AddEndpointsApiExplorer(); // Add this line
 builder.Services.AddSwaggerGen(options =>
@@ -43,6 +51,9 @@ builder.Services.AddHybridCache(options =>
 builder.Services.AddScoped<IDocumentService, DocumentService>();
 
 builder.Services.AddScoped<IVectorSearchService, VectorSearchService>();
+
+builder.Services.AddKernel()
+    .AddAzureOpenAIEmbeddingGenerator(aiSettings.Em)
 
 var app = builder.Build();
 

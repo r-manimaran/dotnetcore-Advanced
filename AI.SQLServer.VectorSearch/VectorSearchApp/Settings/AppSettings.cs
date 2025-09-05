@@ -17,4 +17,7 @@ public class AppSettings
     public TimeSpan MessageExpiration { get; set; }
 
     public int MessageLimit { get; set; } = 20;
+
+    public int EmbeddingBatchSize { get; set; } = 32;
+
 }
