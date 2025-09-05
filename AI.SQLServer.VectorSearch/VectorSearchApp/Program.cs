@@ -1,21 +1,31 @@
+using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
+using Microsoft.SemanticKernel.Embeddings;
+using System.Net.Mime;
+using TinyHelpers.Extensions;
 using VectorSearchApp.Components;
+using VectorSearchApp.ContentDecoders;
 using VectorSearchApp.Data;
 using VectorSearchApp.Extensions;
 using VectorSearchApp.Services;
 using VectorSearchApp.Settings;
-
+using VectorSearchApp.TextChunkers;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: true);
 
 // Add services to the container.
-//var aiSettings = builder.Services.ConfigureAndGet<AzureOpenAISettings>(builder.Configuration, "AzureOpenAI")!;
-//var appSettings = builder.Services.ConfigureAndGet<AppSettings>(builder.Configuration, nameof(AppSettings))!;
+var aiSettings = builder.Services.ConfigureAndGet<AzureOpenAISettings>(builder.Configuration, "AzureOpenAI")!;
+
+var appSettings = builder.Services.ConfigureAndGet<AppSettings>(builder.Configuration, nameof(AppSettings))!;
 
 builder.Services.AddEndpointsApiExplorer(); // Add this line
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
@@ -34,12 +44,18 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddAzureSql<AppDbContext>(builder.Configuration.GetConnectionString("Default"), options =>
   {
       options.UseVectorSearch();
+      options.EnableRetryOnFailure(0);
 
   }, options =>
   {
       options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
   });
 
+//builder.Services.AddDbContext<AppDbContext>(options =>
+//{
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
+//    options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+//});
 builder.Services.AddHybridCache(options =>
 {
     options.DefaultEntryOptions = new()
@@ -52,8 +68,22 @@ builder.Services.AddScoped<IDocumentService, DocumentService>();
 
 builder.Services.AddScoped<IVectorSearchService, VectorSearchService>();
 
+builder.Services.AddSingleton<TokenizerService>();
+
+builder.Services.AddKeyedSingleton<IContentDecoder, PdfContentDecoder>(MediaTypeNames.Application.Pdf);
+
 builder.Services.AddKernel()
-    .AddAzureOpenAIEmbeddingGenerator(aiSettings.Em)
+    .AddAzureOpenAIChatCompletion(aiSettings.ChatCompletion.Deployment, aiSettings.ChatCompletion.Endpoint, aiSettings.ChatCompletion.ApiKey, modelId: aiSettings.ChatCompletion.ModelId)
+    .AddAzureOpenAITextEmbeddingGeneration(aiSettings.Embedding.Deployment, aiSettings.Embedding.Endpoint, aiSettings.Embedding.ApiKey, modelId: aiSettings.Embedding.ModelId);
+
+builder.Services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(serviceProvider =>
+{
+    var kernel = serviceProvider.GetRequiredService<Kernel>();
+    return kernel.GetRequiredService<ITextEmbeddingGenerationService>()
+                 .AsEmbeddingGenerator();
+});
+
+builder.Services.AddKeyedSingleton<ITextChunker, DefaultTextChunker>(KeyedService.AnyKey);
 
 var app = builder.Build();
 
@@ -68,6 +98,7 @@ if (!app.Environment.IsDevelopment())
 
 //app.UseSwaggerUI(options =>
 //    options.SwaggerEndpoint("/openapi/v1.json", "OpenApi v1"));
+app.UseAntiforgery();
 
 app.UseSwagger();
 
@@ -76,11 +107,11 @@ app.UseSwaggerUI(options =>
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "Vector Search API v1");
 });
 
-app.MapEndpoints();
+
+app.MapProjectEndpoints();
 
 app.UseHttpsRedirection();
 
-app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

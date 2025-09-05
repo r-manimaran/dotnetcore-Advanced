@@ -17,7 +17,7 @@ namespace VectorSearchApp.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.4")
+                .HasAnnotation("ProductVersion", "9.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -59,6 +59,12 @@ namespace VectorSearchApp.Migrations
                         .HasColumnType("vector(1536)");
 
                     b.Property<int>("Index")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IndexOnPage")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PageNumber")
                         .HasColumnType("int");
 
                     b.HasKey("Id");

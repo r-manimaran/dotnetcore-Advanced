@@ -39,8 +39,8 @@ public class VectorSearchService(IServiceProvider serviceProvider, AppDbContext 
 
         var strategy = dbContext.Database.CreateExecutionStrategy();
 
-        var document = await strategy.ExecuteAsync((object?)null, async(context, state,ct) =>
-        {
+      //  var document = await strategy.ExecuteAsync((object?)null, async(context, state,ct) =>
+       // {
             await dbContext.Database.BeginTransactionAsync(cancellationToken);
             if(documentId.HasValue)
             {
@@ -84,8 +84,8 @@ public class VectorSearchService(IServiceProvider serviceProvider, AppDbContext 
             await dbContext.SaveChangesAsync(cancellationToken);
             await dbContext.Database.CommitTransactionAsync(cancellationToken);
 
-            return document;
-        },null, cancellationToken);
+          //  return document;
+        //},null, cancellationToken);
         return new ImportDocumentResponse(document.Id,tokenCount);
     }
 }
