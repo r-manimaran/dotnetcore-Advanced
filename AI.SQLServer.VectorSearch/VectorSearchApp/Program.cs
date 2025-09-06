@@ -21,7 +21,6 @@ builder.Configuration.AddJsonFile("appsettings.local.json", optional: true, relo
 
 // Add services to the container.
 var aiSettings = builder.Services.ConfigureAndGet<AzureOpenAISettings>(builder.Configuration, "AzureOpenAI")!;
-
 var appSettings = builder.Services.ConfigureAndGet<AppSettings>(builder.Configuration, nameof(AppSettings))!;
 
 builder.Services.AddEndpointsApiExplorer(); // Add this line
@@ -56,6 +55,7 @@ builder.Services.AddAzureSql<AppDbContext>(builder.Configuration.GetConnectionSt
 //    options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
 //    options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 //});
+
 builder.Services.AddHybridCache(options =>
 {
     options.DefaultEntryOptions = new()
@@ -64,13 +64,17 @@ builder.Services.AddHybridCache(options =>
     };
 });
 
+// Register Services
 builder.Services.AddScoped<IDocumentService, DocumentService>();
-
 builder.Services.AddScoped<IVectorSearchService, VectorSearchService>();
 
 builder.Services.AddSingleton<TokenizerService>();
 
+// Register Content Decoders
 builder.Services.AddKeyedSingleton<IContentDecoder, PdfContentDecoder>(MediaTypeNames.Application.Pdf);
+builder.Services.AddKeyedSingleton<IContentDecoder, DocxContentDecoder>("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+builder.Services.AddKeyedSingleton<IContentDecoder, TextContentDecoder>(MediaTypeNames.Text.Plain);
+builder.Services.AddKeyedSingleton<IContentDecoder, TextContentDecoder>(MediaTypeNames.Text.Markdown);
 
 builder.Services.AddKernel()
     .AddAzureOpenAIChatCompletion(aiSettings.ChatCompletion.Deployment, aiSettings.ChatCompletion.Endpoint, aiSettings.ChatCompletion.ApiKey, modelId: aiSettings.ChatCompletion.ModelId)
@@ -83,7 +87,9 @@ builder.Services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(ser
                  .AsEmbeddingGenerator();
 });
 
+// Register Text Chunkers
 builder.Services.AddKeyedSingleton<ITextChunker, DefaultTextChunker>(KeyedService.AnyKey);
+builder.Services.AddKeyedSingleton<ITextChunker, MarkdownTextChunker>(MediaTypeNames.Text.Markdown);
 
 var app = builder.Build();
 
@@ -96,8 +102,6 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-//app.UseSwaggerUI(options =>
-//    options.SwaggerEndpoint("/openapi/v1.json", "OpenApi v1"));
 app.UseAntiforgery();
 
 app.UseSwagger();
@@ -107,13 +111,12 @@ app.UseSwaggerUI(options =>
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "Vector Search API v1");
 });
 
-
 app.MapProjectEndpoints();
 
 app.UseHttpsRedirection();
 
-
 app.MapStaticAssets();
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

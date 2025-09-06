@@ -26,5 +26,6 @@ public static class AppExtensions
     public static void MapProjectEndpoints(this IEndpointRouteBuilder endpoints)
     {
         DocumentEndpoints.MapEndpoints(endpoints);
+        AskEndpoints.MapEndpoints(endpoints);
     }
 }
