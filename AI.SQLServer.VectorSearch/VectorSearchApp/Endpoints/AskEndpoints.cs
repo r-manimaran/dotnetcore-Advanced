@@ -4,6 +4,7 @@ using VectorSearchApp.Models;
 using VectorSearchApp.Services;
 using FluentValidation;
 using MinimalHelpers.FluentValidation;
+using Microsoft.AspNetCore.Mvc;
 
 namespace VectorSearchApp.Endpoints;
 
@@ -11,11 +12,9 @@ public class AskEndpoints : IEndpointRouteHandlerBuilder
 {
     public static void MapEndpoints(IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPost("/api/ask", async (Question question, VectorSearchService vectorSearchService, CancellationToken cancellationToken,
+        endpoints.MapPost("/api/ask", async (Question question, [FromServices] IVectorSearchService vectorSearchService, CancellationToken cancellationToken,
             [Description("If true, the question will be reformulated taking into account the context of the chat identified by the conversationId")]bool reformulate =true) =>
         {
-            // This is a placeholder for the actual implementation of the ask endpoint.
-
             var response = await vectorSearchService.AskQuestionAsync(question, reformulate, cancellationToken);
 
             return TypedResults.Ok(response);
@@ -27,7 +26,7 @@ public class AskEndpoints : IEndpointRouteHandlerBuilder
         .WithTags("Ask");
 
 
-        endpoints.MapPost("/api/ask/streaming", async (Question question, VectorSearchService vectorSearchService, CancellationToken cancellationToken,
+        endpoints.MapPost("/api/ask/streaming", async (Question question, [FromServices] IVectorSearchService vectorSearchService, CancellationToken cancellationToken,
             [Description("If true, the question will be reformulated taking into account the context of the chat identified by the conversationId")]bool reformulate = true) =>
         {
             async IAsyncEnumerable<Response> Stream()

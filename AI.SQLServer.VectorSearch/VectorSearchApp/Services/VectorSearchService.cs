@@ -1,24 +1,99 @@
 ﻿//using DocumentFormat.OpenXml.Office.SpreadSheetML.Y2023.MsForms;
 using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
+using Microsoft.SemanticKernel.ChatCompletion;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using VectorSearchApp.ContentDecoders;
 using VectorSearchApp.Data;
 using VectorSearchApp.Models;
 using VectorSearchApp.Settings;
+using ChatResponse = VectorSearchApp.Models.ChatResponse;
 using Entities = VectorSearchApp.Data.Entities; 
 
 namespace VectorSearchApp.Services;
 
-public class VectorSearchService(IServiceProvider serviceProvider, AppDbContext dbContext, IDocumentService documentService,
-    IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator, TokenizerService tokenizerService,
+public partial class VectorSearchService(IServiceProvider serviceProvider, AppDbContext dbContext, IDocumentService documentService,
+    IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator, TokenizerService tokenizerService,IChatService chatService,
     TimeProvider timeProvider, IOptions<AppSettings> appSettingsOptions, ILogger<VectorSearchService> logger) : IVectorSearchService
 {
     private readonly AppSettings appSettings = appSettingsOptions.Value;
-    public Task<Response> AskQuestionAsync(Question question, bool reformulate = true, CancellationToken cancellationToken = default)
+    public async Task<Response> AskQuestionAsync(Question question, bool reformulate = true, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var (reformulatedQuestion, embeddingTokenCount, chunks) =await CreateContextAsync(question, reformulate, cancellationToken);
+
+        var (fullanswer, tokenUsage) = await chatService.AskQuestionAsync(question.ConversationId, chunks, reformulatedQuestion.Text!, cancellationToken);
+
+        // Extract the citations from the answer
+        var (answer, citations) = ExtractCitations(fullanswer);
+
+        return new(question.Text, reformulatedQuestion.Text!, answer, StreamState.end, new(reformulatedQuestion.TokenUsage, embeddingTokenCount, tokenUsage), citations);
+    }
+
+    private static (string answer, IEnumerable<Citation>) ExtractCitations(string fullanswer)
+    {
+        var citations = new List<Citation>();
+
+        if(string.IsNullOrEmpty(fullanswer))
+        {
+            return (fullanswer ?? string.Empty, citations);
+        }
+
+        var matches = CitationRegEx.Matches(fullanswer);
+
+        foreach(Match match in matches)
+        {
+            if(match.Success)
+            {
+                citations.Add(new Citation
+                {
+                    DocumentId = Guid.Parse(match.Groups["documentId"].Value),
+                    ChunkId = Guid.Parse(match.Groups["chunkId"].Value),
+                    FileName = match.Groups["fileName"].Value,
+                    PageNumber = int.TryParse(match.Groups["pageNumber"].Value, out var pageNumber) && pageNumber > 0? pageNumber  : null,
+                    IndexOnPage = int.TryParse(match.Groups["indexOnPage"].Value, out var indexOnPage) ? indexOnPage : 0,
+                    Quote = match.Groups["quote"].Value,
+                });
+            }
+        }
+
+        // Remove all content between [ and ]
+        var cleanText = RemoveCitationRegEx.Replace(fullanswer, string.Empty).TrimEnd();
+        return (cleanText, citations.OrderBy(c => c.FileName).ThenBy(c => c.PageNumber));
+    }
+
+
+
+    [GeneratedRegex(@"<citation\s+document-id=(?:""|'|)(?<documentId>[^""']*)(?:""|'|)\s+chunk-id=(?:""|'|)(?<chunkId>[^""']*)(?:""|'|)\s+filename=(?:""|'|)(?<filename>[^""']*)(?:""|'|)\s+page-number=(?:""|'|)(?<pageNumber>[^""']*)(?:""|'|)\s+index-on-page=(?:""|'|)(?<indexOnPage>[^""']*)(?:""|'|)>\s*(?<quote>.*?)\s*</citation>", RegexOptions.Singleline)]
+    private static partial Regex CitationRegEx { get; }
+
+    [GeneratedRegex(@" [.*?]", RegexOptions.Singleline)]
+    private static partial Regex RemoveCitationRegEx { get; }
+
+    private async Task<(ChatResponse reformulatedQuestion, int embeddingTokenCount, IEnumerable<Entities.DocumentChunk> chunks)> CreateContextAsync(Question question, 
+        bool reformulate, 
+        CancellationToken cancellationToken)
+    {
+        // Reformulate the question taking into account the context of the chat to perform keyword search and embeddings.
+        var reformulatedQuestion = reformulate ? await chatService.CreateQuestionAsync(question.ConversationId, question.Text, cancellationToken) :
+                                   new(question.Text);
+
+        var embeddingTokenCount = tokenizerService.CountEmbeddingTokens(reformulatedQuestion.Text!);
+        logger.LogDebug("Reformulated question: {ReformulatedQuestion} (tokens: {TokenCount})", reformulatedQuestion.Text, embeddingTokenCount);
+
+        // Perform a vector search to find the most relevant document chunks.
+        var questionEmbedding = await embeddingGenerator.GenerateVectorAsync(reformulatedQuestion.Text!, cancellationToken: cancellationToken);
+
+        var chunks = await dbContext.DocumentChunks.Include(c=>c.Document)
+            .OrderBy(d=>EF.Functions.VectorDistance("cosine",d.Embedding,questionEmbedding.ToArray()))
+            .Take(appSettings.MaxRelevantChunks)
+            .ToListAsync(cancellationToken);
+
+        logger.LogDebug("Found {ChunkCount} relevant chunks for the question.", chunks.Count);
+        return (reformulatedQuestion, embeddingTokenCount, chunks);
+
     }
 
     public IAsyncEnumerable<Response> AskStreamingAsync(Question question, bool reformulate = true, [EnumeratorCancellation] CancellationToken cancellationToken = default)

@@ -1,4 +1,5 @@
 using DocumentFormat.OpenXml.Spreadsheet;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
@@ -67,6 +68,7 @@ builder.Services.AddHybridCache(options =>
 // Register Services
 builder.Services.AddScoped<IDocumentService, DocumentService>();
 builder.Services.AddScoped<IVectorSearchService, VectorSearchService>();
+builder.Services.AddScoped<IChatService, ChatService>();
 
 builder.Services.AddSingleton<TokenizerService>();
 
@@ -86,6 +88,9 @@ builder.Services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(ser
     return kernel.GetRequiredService<ITextEmbeddingGenerationService>()
                  .AsEmbeddingGenerator();
 });
+builder.Services.AddSingleton(TimeProvider.System);
+
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 // Register Text Chunkers
 builder.Services.AddKeyedSingleton<ITextChunker, DefaultTextChunker>(KeyedService.AnyKey);
