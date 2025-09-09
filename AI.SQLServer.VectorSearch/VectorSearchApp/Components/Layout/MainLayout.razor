@@ -16,8 +16,14 @@
     </main>
 </div>
 
+<Toasts class="p-3" AutoHide="true" Messages="ToastMessages" Placement="ToastsPlacement.TopRight" />
+
+
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+@code {
+    List<ToastMessage> ToastMessages = new List<ToastMessage>();
+}

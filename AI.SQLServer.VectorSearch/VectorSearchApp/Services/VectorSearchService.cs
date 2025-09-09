@@ -51,7 +51,7 @@ public partial class VectorSearchService(IServiceProvider serviceProvider, AppDb
                 {
                     DocumentId = Guid.Parse(match.Groups["documentId"].Value),
                     ChunkId = Guid.Parse(match.Groups["chunkId"].Value),
-                    FileName = match.Groups["fileName"].Value,
+                    FileName = match.Groups["filename"].Value,
                     PageNumber = int.TryParse(match.Groups["pageNumber"].Value, out var pageNumber) && pageNumber > 0? pageNumber  : null,
                     IndexOnPage = int.TryParse(match.Groups["indexOnPage"].Value, out var indexOnPage) ? indexOnPage : 0,
                     Quote = match.Groups["quote"].Value,

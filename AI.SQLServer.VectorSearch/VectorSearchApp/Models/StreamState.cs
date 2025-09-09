@@ -4,5 +4,5 @@ public enum StreamState
 {
     Start,
     Append,
-    end
+    End
 }

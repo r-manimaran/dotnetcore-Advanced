@@ -1,3 +1,3 @@
 ﻿namespace VectorSearchApp.Models;
 
-public record class Document(Guid Id, string Name, DateTimeOffset creationDate, int ChunkCount);
+public record class Document(Guid Id, string Name, DateTimeOffset CreationDate, int ChunkCount);

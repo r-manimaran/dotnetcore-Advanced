@@ -14,26 +14,23 @@
     Upload new Document
 </h4>
 
-<EditForm Model="Model" OnValidSubmit="UploadFile" FormName="UploadDocumentForm">
+<div class="input-group">
+    <span class="input-group-text">
+        <Tooltip Title="PDF, DOCX, TXT and MD files are supported" Color="TooltipColor.Primary" Placement="TooltipPlacement.Bottom">
+            <Icon Class="d-flex text-body-secondary" Name="IconName.InfoCircle"></Icon>
+        </Tooltip>
+    </span>
+    <InputFile class="form-control" OnChange="@OnFileChange" accept=".pdf,.docx,.txt,.md" id="fileInput" />
+</div>
+<EditForm Model="Model" OnValidSubmit="UploadFile">
     <DataAnnotationsValidator />
 
     <div class="row">
         <div class="col-md-5 col-sm-4 col-5">
-            <div class="input-group">
-                <span class="input-group-text">
-                    <Tooltip Title="PDF, DOCX, TXT and MD files are supported" Color="TooltipColor.Primary" Placement="TooltipPlacement.Bottom">
-                        <Icon Class="d-flex text-body-secondary" Name="IconName.InfoCircle"></Icon>
-                    </Tooltip>
-                </span>
-                <InputFile class="form-control" OnChange="@((e)=> Model.File = e.File)" accept=".pdf,.docx,.txt,.md" id="fileInput"/>
-            </div>
+            
         </div>
 
-        <div class="col-md-5 col-sm-4 col-5">
-            <div class="input-group">
-                <TextInput Placeholder="Enter a valid GUID or leave empty for auto-generation" @bind-value="Model.DocumentId" />
-            </div>
-        </div>
+      
         <div class="col-md-2 col-sm-3 col-2">
             <div class="d-grid gap-2">
                 <span class="input-group-text">
@@ -43,7 +40,15 @@
                     </Tooltip>
                     Document ID
                 </span>
-                <Button @ref="uploadButton" type="ButtonType.Submit" Color="ButtonColor.Primary" To="#"><Icon Name="IconName.Upload" /><span class="d-none d-lg-inline ps-3">Upload</span></Button>
+                <TextInput Placeholder="Enter a valid GUID or leave empty for auto-generation" @bind-Value="@Model.DocumentId" />
+            </div>
+            <ValidationMessage For="@(() => Model.DocumentId)" />
+        </div>
+
+        <div class="col-md-2 col-sm-3 col-2">
+            <div class="d-grid gap-2">
+                <Button @ref="uploadButton" Type="ButtonType.Submit" Color="ButtonColor.Primary" To="#" Disabled="@(Model.File is null)" 
+                Class="w-100 py-2 fw-semibold shadow-sm"><Icon Name="IconName.Upload" /><span class="d-none d-lg-inline ps-3">Upload</span></Button>
             </div>
         </div>
     </div>
@@ -63,20 +68,55 @@ else
         Available Documents
     </h4>
 
-    @foreach(var doc in documents)
-    {
-        <td>@doc.Id</td>
-        <td>@doc.Name</td>
-        <td>
-            <span class="badge content-type-badge px-2 py-1 rounded-pill small">
-                @doc.ContentType
-            </span>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 border rounded overflow-hidden">
+            <thead class="table-light sticky-top">
+                <tr>
+                    <th style="width:40px;"></th>
+                    <th class="text-secondary">ID</th>
+                    <th class="text-secondary">Name</th>
+                    <th class="text-secondary">Content type</th>
+                    <th class="text-secondary text-center">Chunks</th>
+                    <th class="text-secondary">Created</th>
+                </tr>
+            </thead>
 
-        </td>
+            <tbody>
+                @foreach (var doc in documents)
+                {
+                    <tr class="@((doc.IsSelected ? "table-primary":null))">
+                        <td>
+                            <div class="d-flex justify-content-center align-items-center">
+                                <CheckboxInput @bind-Value="doc.IsSelected" />
+                            </div>
+                        </td>
+                        <td>@doc.Id</td>
+                        <td>@doc.Name</td>
+                        <td>
+                            <span class="badge content-type-badge px-2 py-1 rounded-pill small">
+                                @doc.ContentType
+                            </span>
 
-        <td>@doc.ChunkCount</td>
-        <td>@doc.LocalCreationDateString</td>
-    }
+                        </td>
+
+                        <td>@doc.ChunkCount</td>
+                        <td>@doc.LocalCreationDateString</td>
+                    </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    <div class="row">
+        <div class="col col-sm-3 col-2">
+            <div class="d-grid gap-2">
+                <Button @ref="deleteButton" Color="ButtonColor.Danger" Disabled="@(!documents.Any(d => d.IsSelected))" @onclick="DeleteSelectedDocuments" Class="w-100 py-2 fw-semibold shadow-sm">
+                    <Icon Name="IconName.Trash" /><span class="d-none d-lg-inline ps-3">Delete</span>
+                </Button>
+            </div>
+        </div>
+    </div>
+
+    
 }
 
 @code {
@@ -92,12 +132,23 @@ else
     private IList<SelectableDocument> documents = [];
     #region Methods
 
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine("OnInitialized called");
+        await using var scope = ServiceProvider.CreateAsyncScope();
+        await LoadDocumentsAsync(scope.ServiceProvider);
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        Console.WriteLine($"OnAfterRenderAsync called - firstRender: {firstRender}");
         if (!firstRender)
         {
+            Console.WriteLine("Not first render, returning");
             return;
         }
+        Console.WriteLine("Starting LoadDocumentsAsync...");
+
         await using var scope = ServiceProvider.CreateAsyncScope();
         await LoadDocumentsAsync(scope.ServiceProvider);
         StateHasChanged();
@@ -115,9 +166,9 @@ else
             documents.Clear();
             foreach(var dbDocument in dbDocuments)
             {
-                documents.Add(new SelectableDocument(dbDocument.Id, dbDocument.Name, dbDocument.creationDate, dbDocument.ChunkCount)
+                documents.Add(new SelectableDocument(dbDocument.Id, dbDocument.Name, dbDocument.CreationDate, dbDocument.ChunkCount)
                     {
-                        LocalCreationDateString = await GetLocalDateTimeStringAsync(dbDocument.creationDate)
+                        LocalCreationDateString = await GetLocalDateTimeStringAsync(dbDocument.CreationDate)
                     });
             }            
         }
@@ -128,13 +179,20 @@ else
         finally
         {
             isLoading = false;
-        
+
         }
     }
 
-
+    private void OnFileChange(InputFileChangeEventArgs e)
+    {
+        Console.WriteLine("OnFileChange called!"); // Add this first
+        Model.File = e.File;
+        Console.WriteLine($"File selected: {e.File?.Name}");       
+        StateHasChanged(); // Force UI update
+    }
     private async Task UploadFile()
     {
+        Console.WriteLine($"UploadFile called. Model.File is null: {Model.File is null}");
         if(Model.File is null)
         {
             return;
@@ -184,8 +242,50 @@ else
 
     private async Task<string> GetLocalDateTimeStringAsync(DateTimeOffset dateTimeOffset)
     {
-        var localDateTime = await JSRuntime.InvokeAsync<string>("getLocalTime", dateTimeOffset);
-        return localDateTime;
+        return dateTimeOffset.ToString("yyyy-MM-dd HH:mm:ss");
+    }
+
+    private async Task DeleteSelectedDocuments()
+    {
+        var selectedDocuments = documents?.Where(d => d.IsSelected).Select(d => d.Id) ?? [];
+
+        var options = new ConfirmDialogOptions
+            {
+                YesButtonText = "Yes",
+                YesButtonColor = ButtonColor.Danger,
+                NoButtonText = "No",
+                NoButtonColor = ButtonColor.Secondary,
+            };
+
+        var confirmation = await dialog.ShowAsync(
+            title: "Delete the selected documents?",
+            message1: " This will delete the documents and all their corresponding embeddings. This operation cannot be undone.",
+            message2: "Do you want to proceed?",
+            confirmDialogOptions: options);
+        if(!confirmation)
+        {
+            return;
+        }
+
+        try
+        {
+            deleteButton.ShowLoading();
+
+            await using var scope = ServiceProvider.CreateAsyncScope();
+            var documentService = scope.ServiceProvider.GetRequiredService<IDocumentService>();
+            await documentService.DeleteAsync(selectedDocuments);
+
+            await LoadDocumentsAsync(scope.ServiceProvider);
+            ToastService.Notify(await CreateToastMessage(ToastType.Success, "Delete documents", $"{selectedDocuments.Count()} document(s) have been successfully deleted."));
+        }
+        catch(Exception ex)
+        {
+            ToastService.Notify(await CreateToastMessage(ToastType.Danger, "Delete Error", $"An error occurred while deleting documents: {ex.Message}"));
+        }
+        finally
+        {
+            deleteButton.HideLoading();
+        }
     }
     #endregion
 

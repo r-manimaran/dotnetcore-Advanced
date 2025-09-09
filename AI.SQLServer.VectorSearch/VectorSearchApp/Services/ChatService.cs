@@ -106,7 +106,7 @@ public class ChatService(IChatCompletionService chatCompletionService, Tokenizer
         {
             MaxTokens = appSettings.MaxOutputTokens
         };
-        var chat = new ChatHistory();
+        var chat = new ChatHistory(systemPromptForAnswering);
 
         var prompt = new StringBuilder($"""
             Ansswer the following question.
