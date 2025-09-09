@@ -37,7 +37,7 @@ public class DocumentEndpoints : IEndpointRouteHandlerBuilder
         .WithDescription("Uploads a document to a SQL database and save its embedding using the native VECTOR type.The document will be indexed and used to answer questions. Currently, PDF, DOCX, TXT and MD files are supported.");
     
 
-        documentApiGroup.MapGet("{documentId:guid}/chunks", async ([FromRoute] Guid documentId,[FromServices]  IDocumentService documentService, CancellationToken cancellationToken) =>
+       documentApiGroup.MapGet("{documentId:guid}/chunks", async ([FromRoute] Guid documentId,[FromServices]  IDocumentService documentService, CancellationToken cancellationToken) =>
         {
             var documents = await documentService.GetChunksAsync(documentId, cancellationToken);
             return TypedResults.Ok(documents);

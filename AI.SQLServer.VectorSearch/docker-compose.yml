@@ -1,17 +1,11 @@
 services:
-  vectorsearchapp:
-    image: ${DOCKER_REGISTRY-}vectorsearchapp
-    build:
-      context: .
-      dockerfile: VectorSearchApp/Dockerfile
   mssql:
     container_name: sql-server
-    image: mcr.microsoft.com/mssql/server:latest
+    image: mcr.microsoft.com/mssql/server:2025-latest
     restart: always
     environment:
         ACCEPT_EULA: "Y"
-        SA_PASSWORD: "Strong_Pa55$"
+        SA_PASSWORD: "MyStrongPassword123!"
+        MSSQL_PID: "Express"
     ports:
-     - 1433:1433
-    volumes:
-     - ./mssql:/var/opt/mssql
+     - "1500:1433"

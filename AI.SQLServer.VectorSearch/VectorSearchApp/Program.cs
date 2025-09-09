@@ -36,6 +36,8 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+builder.Services.AddBlazorBootstrap();
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
