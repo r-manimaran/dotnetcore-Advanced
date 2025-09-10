@@ -5,12 +5,15 @@
 
 
 <PageTitle>Chat with your data</PageTitle>
+
 <div class="card mx-auto mt-2">
     <div class="card-body">
         @foreach(var message in messages)
         {
-            <div class="d-flex align-items-baseline text-end justify-content-end">
-                <div class="pe-2">
+            if (message.Role == "user")
+            {
+                <div class="d-flex align-items-baseline text-end justify-content-end">
+                    <div class="pe-2">
                     <div>
                         <div class="card card-text d-inline-block p-2 px-3 m-1">
                             <Markdown style="overflow-y:auto;">@message.Text</Markdown>
@@ -21,19 +24,120 @@
                     <Image src="/images/user.png" class="img-fluid rounded-circle" alt=""/>
                 </div>
             </div>
+            }
+            else if (message.Role == "assistant")
+            {
+                <div class="d-flex align-items-baseline">
+                    <div class="position-relative avatar">
+                        <Image src="/images/assistant.png" class="img-fluid rounded-circle" alt="" />
+                    </div>
+                    <div class="pe-2">
+                        <div>
+                            @if (message.Text is null)
+                            {
+                                <div class="card card-text d-inline-block p-3 px-3 m-1">
+                                    <div class="progress-chat" role="progressbar" aria-label="I'm thinking" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                        <div class="progress-bar-chat">
+                                            <div class="progress-bar-indeterminate"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="card card-text d-inline-block p-2 px-3 m-1">
+                                    <div class="message-content">
+                                        <div class="streaming-content">
+                                            <div class="streaming-text @(message.Status == MessageStatus.Streaming ? "streaming-text-with-spinner" : "")">
+                                                <Markdown style="overflow-y:auto;">@message.Text</Markdown>
+                                            </div>
+                                            @if (message.Status == MessageStatus.Streaming)
+                                            {
+                                                <div class="streaming-spinner-bottom-left">
+                                                    <Spinner Size="SpinnerSize.Small" Color="SpinnerColor.Primary" />
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                    @if (message.Status == MessageStatus.Completed)
+                                    {
+                                        <div class="d-flex justify-content-between">
+                                            <div class="text-start bg-transparent mt-3">
+                                                <Tooltip Title="@message.TokenUsage" IsHtml="true" Color="TooltipColor.Primary" Placement="TooltipPlacement.Bottom">
+                                                    <Icon Class="d-flex text-body-secondary" Name="IconName.InfoCircle"></Icon>
+                                                </Tooltip>
+                                            </div>
+                                            <div class="text-end bg-transparent">
+                                                <Tooltip Title="@toolTipText" Color="TooltipColor.Dark" Placement="TooltipPlacement.Bottom">
+                                                    <Button Type="ButtonType.Button" Outline="false" @onclick="@(async () => await CopyToClipboardAsync(message.Text))">
+                                                        @if (showCopyConfirmation)
+                                                        {
+                                                            <Icon Name="IconName.Check" Class="text-success" />
+                                                        }
+                                                        else
+                                                        {
+                                                            <Icon Name="IconName.Clipboard" />
+                                                        }
+                                                    </Button>
+                                                </Tooltip>
+                                            </div>
+                                        </div>
+                                        @if (message.Citations is not null && message.Citations.Count() > 0)
+                                        {
+                                            <div class="mt-3 d-flex flex-wrap">
+                                                @foreach (var citation in message.Citations)
+                                                {
+                                                    <div class="border rounded p-2 me-2 mb-2 citation-box small">
+                                                        <div>
+                                                            <strong>@citation.FileName</strong> @if (citation.PageNumber.GetValueOrDefault() > 0)
+                                                            {
+                                                                <span class="ms-2">pag. @citation.PageNumber</span>
+                                                            }
+                                                        </div>
+                                                        <div class="text-secondary small mt-1">@citation.Quote</div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
         }
-        else if(message.Role =="assistant")
-        {
-
-        }
+       
     </div>
 </div>
 
+<div class="card bg-white w-100 bottom-0 m-0 p-1">
+    <div class="input-group">
+        <span class="input-group-text bg-transparent border-0">
+            <Tooltip Title="Messages aren't stored in any way on either the client or the server." Color="TooltipColor.Primary"
+            Placement="TooltipPlacement.Bottom">
+            <Icon Class="d-flex text-body-secondary" Name="IconName.InfoCircle"></Icon>
+        </Tooltip>
+        </span>
+        <input @ref="askInput" @bind="question" @bind:event="oninput" @onkeydown="HandleKeyDown" type="text" class="form-control border-0" placeholder="Ask a question about your data..." autocomplete="off" disabled="@isAsking"
+        maxlength="2000" />
+        <div class="input-group-text bg-transparent border-0">
+            <Button Type="ButtonType.Submit" @ref="askButton" Color="ButtonColor.Primary" Disabled="@(isAsking || string.IsNullOrWhiteSpace(question))"
+            @onclick ="AskQuestion">
+            <Icon Name="IconName.Send"/>
+        </Button>
+
+        <Button Type="ButtonType.Reset" @ref="resetButton" Class="ms-2" Color="ButtonColor.Secondary" Disabled="@isAsking" @onclick="Reset">
+            <Icon CustomIconName="bi bi-x-lg" />
+        </Button>
+        </div>
+    </div>
+</div>
 
 @code {
 
-    // private Button askButton = default!;
-    // private Button resetButton = default!;
+    private Button askButton = default!;
+    private Button resetButton = default!;
     private ElementReference askInput = default!;
     private ElementReference chat = default!;
 
@@ -41,6 +145,8 @@
     private string? question;
     private Guid conversationId = Guid.NewGuid();
     private bool isAsking = false;
+    private bool showCopyConfirmation = false;
+    private string toolTipText = "Copy to Clipboard";
 
     private void Reset()
     {
@@ -49,13 +155,32 @@
         messages.Clear();
     }
 
+    private async Task CopyToClipboardAsync(string text)
+    {
+        if (text is null)
+            return;
+
+        await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", text);
+
+        showCopyConfirmation = true;
+        toolTipText = "Copied!";
+        StateHasChanged();
+
+        await Task.Delay(2000);
+        toolTipText = "Copy to Clipboard";
+        showCopyConfirmation = false;
+        StateHasChanged();
+
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if(!firstRender)
         {
             return;
         }
-        // await JSRuntime.InvokeVoidAsync("setFocus", askInput);
+        //   await JSRuntime.InvokeVoidAsync("setFocus", askInput);
+        await askInput.FocusAsync();
     }
 
     private async Task EnsureMessageIsVisibleAsync()

@@ -14,20 +14,20 @@
     Upload new Document
 </h4>
 
-<div class="input-group">
-    <span class="input-group-text">
-        <Tooltip Title="PDF, DOCX, TXT and MD files are supported" Color="TooltipColor.Primary" Placement="TooltipPlacement.Bottom">
-            <Icon Class="d-flex text-body-secondary" Name="IconName.InfoCircle"></Icon>
-        </Tooltip>
-    </span>
-    <InputFile class="form-control" OnChange="@OnFileChange" accept=".pdf,.docx,.txt,.md" id="fileInput" />
-</div>
+
 <EditForm Model="Model" OnValidSubmit="UploadFile">
     <DataAnnotationsValidator />
 
     <div class="row">
         <div class="col-md-5 col-sm-4 col-5">
-            
+            <div class="input-group">
+                <span class="input-group-text">
+                    <Tooltip Title="PDF, DOCX, TXT and MD files are supported" Color="TooltipColor.Primary" Placement="TooltipPlacement.Bottom">
+                        <Icon Class="d-flex text-body-secondary" Name="IconName.InfoCircle"></Icon>
+                    </Tooltip>
+                </span>
+                <InputFile class="form-control" OnChange="@OnFileChange" accept=".pdf,.docx,.txt,.md" id="fileInput" />
+            </div>
         </div>
 
       

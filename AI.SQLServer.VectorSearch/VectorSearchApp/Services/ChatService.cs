@@ -4,7 +4,9 @@ using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
 using OpenAI.Chat;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading.Tasks;
 using VectorSearchApp.Data.Entities;
 using VectorSearchApp.Models;
 using VectorSearchApp.Settings;
@@ -214,7 +216,39 @@ public class ChatService(IChatCompletionService chatCompletionService, Tokenizer
 
          await cache.SetAsync(conversationId.ToString(), chat, cancellationToken: cancellationToken);
     }
+
+
     #endregion
+
+    public async IAsyncEnumerable<ChatResponse> AskStreamingAsync(Guid conversationId, 
+        IEnumerable<Entities.DocumentChunk> chunks, 
+        string question, 
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var (chat, settings) = CreateChatAsync(chunks, question);
+
+        var answer = new StringBuilder();
+
+        await foreach(var token in chatCompletionService.GetStreamingChatMessageContentsAsync(chat, settings, cancellationToken:cancellationToken))
+        {
+            if(!string.IsNullOrEmpty(token.Content))
+            {
+                yield return new(token.Content);
+                answer.Append(token.Content);
+            }
+            else if(token.Content is null)
+            {
+                var tokenUsage = GetTokenUsage(token);
+                if(tokenUsage is not null)
+                {
+                    logger.LogDebug("Ask Streaming: {TokenUsage}", tokenUsage);
+                    yield return new (null, tokenUsage);
+                }
+            }
+        }
+        await  SetChatHistoryAsync(conversationId, question, answer.ToString(), cancellationToken).ConfigureAwait(false);
+    }
+
 }
 
 public interface IChatService
@@ -224,4 +258,5 @@ public interface IChatService
     // Task<ChatResponse> ContinueConversationAsync(Guid conversationId, string userMessage, CancellationToken cancellationToken = default);
     Task<ChatResponse> AskQuestionAsync(Guid conversationId, IEnumerable<Entities.DocumentChunk> chunks, string question, CancellationToken cancellationToken = default);
 
+    IAsyncEnumerable<ChatResponse> AskStreamingAsync(Guid conversationId, IEnumerable<Entities.DocumentChunk> chunks, string question, [EnumeratorCancellation] CancellationToken cancellationToken = default);
 }

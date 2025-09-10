@@ -5,7 +5,9 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel.ChatCompletion;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using VectorSearchApp.ContentDecoders;
 using VectorSearchApp.Data;
 using VectorSearchApp.Models;
@@ -29,7 +31,7 @@ public partial class VectorSearchService(IServiceProvider serviceProvider, AppDb
         // Extract the citations from the answer
         var (answer, citations) = ExtractCitations(fullanswer);
 
-        return new(question.Text, reformulatedQuestion.Text!, answer, StreamState.end, new(reformulatedQuestion.TokenUsage, embeddingTokenCount, tokenUsage), citations);
+        return new(question.Text, reformulatedQuestion.Text!, answer, StreamState.End, new(reformulatedQuestion.TokenUsage, embeddingTokenCount, tokenUsage), citations);
     }
 
     private static (string answer, IEnumerable<Citation>) ExtractCitations(string fullanswer)
@@ -96,9 +98,43 @@ public partial class VectorSearchService(IServiceProvider serviceProvider, AppDb
 
     }
 
-    public IAsyncEnumerable<Response> AskStreamingAsync(Question question, bool reformulate = true, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<Response> AskStreamingAsync(Question question, bool reformulate = true, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var (reformulatedQuestion, embeddingTokenCount, chunks) = await CreateContextAsync(question, reformulate, cancellationToken);
+
+        var answerStream = chatService.AskStreamingAsync(question.ConversationId, chunks, reformulatedQuestion.Text!, cancellationToken: cancellationToken);
+
+        yield return new(question.Text, reformulatedQuestion.Text!, null, StreamState.Start, new(reformulatedQuestion.TokenUsage, embeddingTokenCount, null));
+
+        TokenUsageResponse? tokenUsageResponse = null;
+        var fullAnswer = new StringBuilder();
+        var citationsStarated = false;
+
+        await foreach(var (token, tokenUsage) in answerStream)
+        {
+            if(token is not null)
+            {
+                fullAnswer.Append(token);
+
+                if(token.Contains('['))
+                {
+                    citationsStarated = true;
+                }
+
+                if(!citationsStarated)
+                {
+                    yield return new(token,StreamState.Append);
+                }
+            }
+            else
+            {
+                tokenUsageResponse ??= tokenUsage is not null? new(tokenUsage) : null;
+            }
+        }
+
+        //Extract the citations from the answer
+        var(_,citations) = ExtractCitations(fullAnswer.ToString());
+        yield return new(null, StreamState.End, tokenUsageResponse, citations);
     }
 
     public async Task<ImportDocumentResponse> ImportAsync(Stream stream, string name, string contentType, Guid? documentId, CancellationToken cancellationToken = default)
