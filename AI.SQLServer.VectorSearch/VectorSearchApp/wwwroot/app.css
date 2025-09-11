@@ -58,3 +58,15 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+.content-type-badge {
+    background-color: #e5e7eb !important;
+    color: #495057 !important;
+    border: 1px solid #d1d5db !important;
+}
+
+.citation-box {
+    width: fit-content;
+    max-width: 100%;
+    background-color: #f8f9fa;
+}

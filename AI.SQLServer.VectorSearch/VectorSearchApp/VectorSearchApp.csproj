@@ -17,9 +17,6 @@
     <NoWarn>1701;1702;SKEXP0010;SKEXP0050;SKEXP0001</NoWarn>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="Components\Pages\Ask.razor.css" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Blazor.Bootstrap" Version="3.4.0" />

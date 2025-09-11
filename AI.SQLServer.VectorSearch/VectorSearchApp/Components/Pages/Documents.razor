@@ -94,9 +94,8 @@ else
                         <td>@doc.Name</td>
                         <td>
                             <span class="badge content-type-badge px-2 py-1 rounded-pill small">
-                                @doc.ContentType
+                                @GetContentTypeDisplay(doc.ContentType)
                             </span>
-
                         </td>
 
                         <td>@doc.ChunkCount</td>
@@ -227,6 +226,15 @@ else
         }
 
     }
+
+    private string GetContentTypeDisplay(string contentType) => contentType switch
+    {
+        "application/pdf" => "PDF",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document" => "DOCX",
+        "text/plain" => "TXT",
+        "text/markdown" => "MD",
+        _ => contentType
+    };
 
     private async Task<ToastMessage> CreateToastMessage(ToastType toastType, string title, string message)
     {

@@ -1,6 +1,6 @@
 ﻿
-using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
 using System.Text;
 using VectorSearchApp.TextChunkers;
 
