@@ -23,7 +23,7 @@ public class MultiCloudEventPublisher : IEventPublisher
 
         var tasks = new[]
         {
-            PublishToServiceAsync("Kinesis", () => _kinesisService.SendAsync(env.PartitionKey,eventPayload,ct)),
+            //PublishToServiceAsync("Kinesis", () => _kinesisService.SendAsync(env.PartitionKey,eventPayload,ct)),
             PublishToServiceAsync("EventHub", () => _eventHubService.SendAsync(env.PartitionKey,eventPayload, ct))
         };
 
