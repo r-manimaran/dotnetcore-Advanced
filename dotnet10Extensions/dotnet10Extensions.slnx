@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="NewFeatures/NewFeatures.csproj" />
+  <Project Path="WebApiFeatures/WebApiFeatures.csproj" />
+</Solution>
