@@ -1,0 +1,27 @@
+﻿@page "/"
+@using BlazorAppUI.Services
+@inject IHumidityService HumitityService
+
+<PageTitle>Home</PageTitle>
+
+<ul>
+    @foreach(var forecast in forecasts)
+    {
+        <li>@forecast %</li>
+    }
+</ul>
+
+@code {
+    private readonly List<int> forecasts = [];
+    protected override async Task OnInitializedAsync()
+    {
+        _ = HumitityService.StartAsync();
+       await foreach(var humidity in HumitityService.GetHumidityStream.ReadAllAsync())
+        {
+            forecasts.Add(humidity);
+            StateHasChanged();
+        }
+    }
+
+}
+
